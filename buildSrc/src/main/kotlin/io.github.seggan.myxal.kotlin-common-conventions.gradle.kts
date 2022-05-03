@@ -34,3 +34,15 @@ tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
+
+tasks.compileJava {
+    sourceCompatibility = "11"
+    targetCompatibility = "11"
+}
+
+tasks.compileKotlin {
+    kotlinOptions {
+        jvmTarget = "11"
+        freeCompilerArgs = freeCompilerArgs + listOf("-Xno-param-assertions", "-Xjvm-default=all-compatibility")
+    }
+}

@@ -83,8 +83,7 @@ object Main {
                 jar.putNextEntry(entry)
                 if (isTest) Files.newInputStream(buildDir.resolve(resource)) else Main::class.java.getResourceAsStream("/$resource")
                     .use { inp ->
-                        if (inp == null) throw NullPointerException("Resource not found: $resource")
-                        inp.transferTo(jar)
+                        inp?.copyTo(jar) ?: println("Skipping resource: $resource")
                     }
             }
             val manifest = Manifest()

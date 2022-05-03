@@ -18,3 +18,7 @@ hs_err_pid*
 
 # Ignore Gradle build output directory
 build/
+
+# And my testing files
+test*.jar
+test.myx

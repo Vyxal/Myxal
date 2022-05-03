@@ -2,7 +2,7 @@ package io.github.seggan.myxal.app.compiler
 
 import io.github.seggan.myxal.app.CompilerOptions
 import io.github.seggan.myxal.app.compiler.wrappers.MyxalMethod
-import io.github.seggan.myxal.app.runtime.ProgramStack
+import io.github.seggan.myxal.runtime.ProgramStack
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Handle
 import org.objectweb.asm.Label

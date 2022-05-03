@@ -1,7 +1,7 @@
 package io.github.seggan.myxal.app.compiler
 
 import io.github.seggan.myxal.app.compiler.wrappers.MyxalMethod
-import io.github.seggan.myxal.app.runtime.text.Compression
+import io.github.seggan.myxal.runtime.text.Compression
 import org.objectweb.asm.ClassWriter
 
 object Constants {
