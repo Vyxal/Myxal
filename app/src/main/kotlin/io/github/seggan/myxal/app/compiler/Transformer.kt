@@ -11,10 +11,13 @@ import io.github.seggan.myxal.compiler.tree.ComplexNode
 import io.github.seggan.myxal.compiler.tree.ContextNode
 import io.github.seggan.myxal.compiler.tree.ContinueNode
 import io.github.seggan.myxal.compiler.tree.ElementNode
+import io.github.seggan.myxal.compiler.tree.FilterLambdaNode
 import io.github.seggan.myxal.compiler.tree.ForINode
 import io.github.seggan.myxal.compiler.tree.ForNode
 import io.github.seggan.myxal.compiler.tree.IfNode
+import io.github.seggan.myxal.compiler.tree.LambdaNode
 import io.github.seggan.myxal.compiler.tree.ListNode
+import io.github.seggan.myxal.compiler.tree.MapLambdaNode
 import io.github.seggan.myxal.compiler.tree.Node
 import io.github.seggan.myxal.compiler.tree.NumNode
 import io.github.seggan.myxal.compiler.tree.RegisterLoadNode
@@ -69,6 +72,9 @@ class Transformer : MyxalParserBaseVisitor<List<Node>>() {
         return when (ctx.MODIFIER().text) {
             "ß" -> listOf(IfNode(result, null))
             "&" -> listOf(RegisterLoadNode(), *result.toTypedArray(), RegisterSetNode())
+            "v" -> listOf(MapLambdaNode(result))
+            "~" -> listOf(FilterLambdaNode(result))
+            "¨=" -> listOf(ElementNode("`"), *result.toTypedArray(), ElementNode("="))
             else -> result
         }
     }
@@ -129,6 +135,40 @@ class Transformer : MyxalParserBaseVisitor<List<Node>>() {
         }
         // crazy nesting of lists
         return listOf(ListNode(list))
+    }
+
+    override fun visitLambda(ctx: MyxalParser.LambdaContext): List<Node> {
+        return listOf(
+            when (ctx.LAMBDA_TYPE().text) {
+                "λ", "⟑" -> LambdaNode(
+                    if (ctx.integer() == null) 1 else ctx.integer().text.toInt(),
+                    visit(ctx.program())
+                )
+                "ƛ" -> MapLambdaNode(visit(ctx.program()))
+                "'" -> FilterLambdaNode(visit(ctx.program()))
+                else -> throw IllegalArgumentException("Unknown lambda type: ${ctx.LAMBDA_TYPE().text}")
+            }
+        )
+    }
+
+    override fun visitOne_element_lambda(ctx: MyxalParser.One_element_lambdaContext): List<Node> {
+        return listOf(LambdaNode(1, visit(ctx.program_node())))
+    }
+
+    override fun visitTwo_element_lambda(ctx: MyxalParser.Two_element_lambdaContext): List<Node> {
+        val result = mutableListOf<Node>()
+        for (element in ctx.program_node()) {
+            result.addAll(visit(element))
+        }
+        return listOf(LambdaNode(1, result))
+    }
+
+    override fun visitThree_element_lambda(ctx: MyxalParser.Three_element_lambdaContext): List<Node> {
+        val result = mutableListOf<Node>()
+        for (element in ctx.program_node()) {
+            result.addAll(visit(element))
+        }
+        return listOf(LambdaNode(1, result))
     }
 
     companion object {

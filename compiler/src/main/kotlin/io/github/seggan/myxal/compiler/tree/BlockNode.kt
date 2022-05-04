@@ -31,3 +31,21 @@ class WhileNode(val condition: List<Node>?, val body: List<Node>) : Node {
         visitor.visitWhile(this)
     }
 }
+
+class LambdaNode(val arity: Int, val body: List<Node>) : Node {
+    override fun accept(visitor: ICompiler) {
+        visitor.visitLambda(this)
+    }
+}
+
+class MapLambdaNode(val body: List<Node>) : Node {
+    override fun accept(visitor: ICompiler) {
+        visitor.visitMapLambda(this)
+    }
+}
+
+class FilterLambdaNode(val body: List<Node>) : Node {
+    override fun accept(visitor: ICompiler) {
+        visitor.visitFilterLambda(this)
+    }
+}
