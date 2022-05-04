@@ -2,7 +2,6 @@ package io.github.seggan.myxal.app
 
 import io.github.seggan.myxal.antlr.MyxalLexer
 import io.github.seggan.myxal.antlr.MyxalParser
-import io.github.seggan.myxal.app.compiler.Compiler
 import io.github.seggan.myxal.runtime.text.Compression
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
@@ -55,7 +54,8 @@ object Main {
             parser.reset()
         }
         println("Compiling program...")
-        val main = Compiler.compile(parser, args[0])
+        //val main = Compiler.compile(parser, args[0])
+        val main = byteArrayOf()
         val cr = ClassReader(main)
         FileOutputStream("debug.log").use { os ->
             val tcv = TraceClassVisitor(PrintWriter(os))

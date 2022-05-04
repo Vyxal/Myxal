@@ -17,7 +17,7 @@ program
     ;
 
 program_node
-    : statement | literal | element
+    : statement | literal | modifier | element
     ;
 
 literal
@@ -104,10 +104,6 @@ three_element_lambda
     : THREE_ELEMENT_LAMBDA program_node program_node program_node
     ;
 
-parameter
-    : STAR | variable | integer
-    ;
-
 variable_assn
     : ASSN_SIGN variable
     ;
@@ -116,8 +112,12 @@ variable
     : (ALPHA | DIGIT | CONSTANT_PREFIX | CONTEXT_VAR)+
     ;
 
+modifier
+    : MODIFIER program_node
+    ;
+
 element
-    : MODIFIER? PREFIX? element_type
+    : PREFIX? element_type
     ;
 
 element_type

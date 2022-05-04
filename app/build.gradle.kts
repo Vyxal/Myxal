@@ -15,11 +15,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":runtime"))
-
-    implementation("org.ow2.asm:asm:9.3")
-    implementation("org.ow2.asm:asm-commons:9.3")
-    implementation("org.ow2.asm:asm-util:9.3")
+    implementation(project(":compiler"))
 
     implementation("com.guardsquare:proguard-base:7.2.1")
 
