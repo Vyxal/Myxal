@@ -38,6 +38,9 @@ You may use any Java escape codes in strings
 
 `¢` is used as the separator for node aliases (see below), and its functionality has been moved into `ÞI`
 
+### `` kv ``
+Due to parsing reasons, `kv` has moved to `kO`
+
 ## Added Elements
 
 ### `` øJ `` (JSON Parse)

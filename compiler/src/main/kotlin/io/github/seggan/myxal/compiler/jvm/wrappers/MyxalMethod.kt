@@ -1,6 +1,5 @@
-package io.github.seggan.myxal.app.compiler.wrappers
+package io.github.seggan.myxal.compiler.jvm.wrappers
 
-import io.github.seggan.myxal.app.CompilerOptions
 import io.github.seggan.myxal.app.compiler.optimise
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Label
@@ -17,7 +16,7 @@ abstract class MyxalMethod internal constructor(cw: ClassWriter, access: Int, na
     var ctxVar = 0
         protected set
 
-    var optimise = CompilerOptions.doesNotContain(CompilerOptions.DONT_OPTIMISE)
+    var optimise = true
 
     private val runtime = "runtime/".toRegex()
 

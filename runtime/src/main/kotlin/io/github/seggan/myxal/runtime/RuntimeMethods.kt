@@ -473,17 +473,20 @@ fun greaterThanOrEqual(stack: ProgramStack): Any {
     return o ?: compare(stack) { i: Int -> i >= 0 }
 }
 
-fun halve(stack: ProgramStack): Any {
+fun halve(stack: ProgramStack) {
     val o = vectorise(1, ::halve, stack)
-    if (o != null) return o
+    if (o != null) {
+        stack.push(o)
+        return
+    }
     val obj = stack.pop()
     return if (obj is BigComplex) {
-        obj.divide(BigComplex.TWO, MathContext.DECIMAL128)
+        stack.push(obj.divide(BigComplex.TWO, MathContext.DECIMAL128))
     } else {
         val str = obj.toString()
         val limit = str.length / 2 + 1
         stack.push(str.substring(0, limit))
-        str.substring(limit)
+        stack.push(str.substring(limit))
     }
 }
 
@@ -499,16 +502,16 @@ fun head(obj: Any): Any {
     }
 }
 
-fun headExtract(stack: ProgramStack): Any {
+fun headExtract(stack: ProgramStack) {
     val obj = stack.pop()
     return if (obj is JyxalList) {
         stack.push(obj[0])
         val iterator = obj.iterator()
         iterator.next()
-        JyxalList.create(iterator)
+        stack.push(JyxalList.create(iterator))
     } else {
         stack.push(obj.toString().substring(1))
-        obj.toString().substring(0, 1)
+        stack.push(obj.toString().substring(0, 1))
     }
 }
 
@@ -547,7 +550,7 @@ fun indexInto(stack: ProgramStack): Any {
     }
 }
 
-fun infinitePrimes(): JyxalList {
+fun infinitePrimes(): Any {
     return JyxalList.create(object : Iterator<Any> {
         private var n = 2L
         private var isOverflowed = false
@@ -729,28 +732,17 @@ private fun isPrime(l: Long): Boolean {
     return true
 }
 
-fun itemSplit(stack: ProgramStack): Any {
+fun itemSplit(stack: ProgramStack) {
     var obj = stack.pop()
     if (obj is BigComplex) {
         obj = obj.re.toBigInteger().toString()
     }
-    return if (obj is JyxalList) {
-        val listSize = obj.size - 1
-        for (i in 0 until listSize) {
-            val item = obj[i]
-            stack.push(item)
-        }
-        obj[listSize]
+    if (obj is JyxalList) {
+        obj.forEach(stack::push)
     } else {
-        val charArray = obj.toString().toCharArray()
-        var i = 0
-        val charArrayLength = charArray.size - 1
-        while (i < charArrayLength) {
-            val c = charArray[i]
-            stack.push(c.toString())
-            i++
+        obj.toString().forEach {
+            stack.push(it.toString())
         }
-        charArray[charArray.size - 1].toString()
     }
 }
 
@@ -1389,11 +1381,11 @@ fun tail(obj: Any): Any {
     }
 }
 
-fun triplicate(stack: ProgramStack): Any {
+fun triplicate(stack: ProgramStack) {
     val obj = stack.pop()
-    stack.push(copy(obj))
-    stack.push(copy(obj))
-    return obj
+    for (i in 0 until 3) {
+        stack.push(obj)
+    }
 }
 
 fun truthyIndexes(obj: Any): Any {
@@ -1429,7 +1421,7 @@ fun twoPow(obj: Any): Any {
 
 fun uneval(obj: Any): Any = "\"${escapeString(obj.toString())}\""
 
-fun uninterleave(stack: ProgramStack): Any {
+fun uninterleave(stack: ProgramStack) {
     val obj = stack.pop()
     stack.push(sequence {
         val iterator = iterator(obj)
@@ -1440,7 +1432,7 @@ fun uninterleave(stack: ProgramStack): Any {
             }
         }
     }.jyxal())
-    return sequence {
+    stack.push(sequence {
         val iterator = iterator(obj)
         while (iterator.hasNext()) {
             iterator.next()
@@ -1448,7 +1440,7 @@ fun uninterleave(stack: ProgramStack): Any {
                 yield(iterator.next())
             }
         }
-    }.jyxal()
+    }.jyxal())
 }
 
 fun uniquify(obj: Any): Any {

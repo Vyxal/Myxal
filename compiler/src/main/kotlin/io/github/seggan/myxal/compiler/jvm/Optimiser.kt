@@ -1,6 +1,6 @@
 package io.github.seggan.myxal.app.compiler
 
-import io.github.seggan.myxal.app.compiler.wrappers.MyxalMethod
+import io.github.seggan.myxal.compiler.jvm.wrappers.MyxalMethod
 import org.objectweb.asm.Opcodes.ALOAD
 import org.objectweb.asm.Opcodes.INVOKEVIRTUAL
 import org.objectweb.asm.Opcodes.SWAP
@@ -60,7 +60,7 @@ fun optimise(codeBlock: InsnList, myxalMethod: MyxalMethod) {
                     // one argument
                     codeBlock.insertBefore(insn, InsnNode(SWAP))
                 }
-            } else if (insn.desc.startsWith("(Lio/github/seggan/jyxal/runtime/ProgramStack;)")) {
+            } else if (insn.desc.startsWith("(Lio/github/seggan/myxal/runtime/ProgramStack;)")) {
                 // these all take the stack as input
                 codeBlock.insertBefore(insn, VarInsnNode(ALOAD, myxalMethod.stackVar))
             }

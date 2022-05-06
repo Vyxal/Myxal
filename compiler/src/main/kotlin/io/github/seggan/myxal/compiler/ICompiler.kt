@@ -1,19 +1,17 @@
 package io.github.seggan.myxal.compiler
 
 import io.github.seggan.myxal.compiler.tree.ComplexNode
-import io.github.seggan.myxal.compiler.tree.ElementNode
-import io.github.seggan.myxal.compiler.tree.FilterLambdaNode
 import io.github.seggan.myxal.compiler.tree.ForINode
 import io.github.seggan.myxal.compiler.tree.ForNode
 import io.github.seggan.myxal.compiler.tree.IfNode
 import io.github.seggan.myxal.compiler.tree.LambdaNode
 import io.github.seggan.myxal.compiler.tree.ListNode
-import io.github.seggan.myxal.compiler.tree.MapLambdaNode
 import io.github.seggan.myxal.compiler.tree.Node
 import io.github.seggan.myxal.compiler.tree.NumNode
 import io.github.seggan.myxal.compiler.tree.WhileNode
+import org.apache.commons.cli.CommandLine
 
-interface ICompiler {
+abstract class ICompiler<O>(protected val options: CommandLine) {
 
     fun visit(node: Node?) {
         node?.accept(this)
@@ -23,29 +21,35 @@ interface ICompiler {
         nodes.forEach { visit(it) }
     }
 
-    fun visitElement(node: ElementNode)
+    abstract fun compile(ast: List<Node>): O
 
-    fun visitIf(node: IfNode)
-    fun visitWhile(node: WhileNode)
-    fun visitFor(node: ForNode)
-    fun visitForI(node: ForINode)
+    abstract fun visitElement(element: Element)
 
-    fun loadContext()
-    fun breakLoop()
-    fun continueLoop()
+    abstract fun visitIf(node: IfNode)
+    abstract fun visitWhile(node: WhileNode)
+    abstract fun visitFor(node: ForNode)
+    abstract fun visitForI(node: ForINode)
 
-    fun loadVariable(name: String)
-    fun storeVariable(name: String)
-    fun loadRegister()
-    fun setRegister()
+    abstract fun loadContext()
+    abstract fun breakLoop()
+    abstract fun continueLoop()
 
-    fun visitString(value: String)
-    fun visitNum(value: NumNode)
-    fun visitComplex(value: ComplexNode)
-    fun visitList(value: ListNode)
+    abstract fun input()
+    abstract fun exit()
 
-    fun visitLambda(node: LambdaNode)
-    fun visitMapLambda(node: MapLambdaNode)
-    fun visitFilterLambda(node: FilterLambdaNode)
+    abstract fun loadVariable(name: String)
+    abstract fun storeVariable(name: String)
+    abstract fun loadRegister()
+    abstract fun setRegister()
+
+    abstract fun visitString(value: String)
+    abstract fun visitNum(value: NumNode)
+    abstract fun visitComplex(value: ComplexNode)
+    abstract fun visitList(value: ListNode)
+
+    abstract fun visitLambda(node: LambdaNode)
+
+    abstract fun wrapStack()
+    abstract fun stackSize()
 
 }

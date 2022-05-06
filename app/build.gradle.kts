@@ -24,6 +24,8 @@ dependencies {
 
 val dest = JPath.of("$buildDir/runtimeClasses")
 
+version = "0.6.0"
+
 application {
     // Define the main class for the application.
     mainClass.set("io.github.seggan.myxal.app.Main")
@@ -102,5 +104,5 @@ tasks.shadowJar {
         include("LICENSE")
     }
 
-    archiveFileName.set("Myxal.jar")
+    archiveFileName.set("Myxal-${project.version}.jar")
 }
