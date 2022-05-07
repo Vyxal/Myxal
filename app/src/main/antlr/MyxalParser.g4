@@ -4,12 +4,16 @@ options {
     tokenVocab=MyxalLexer;
 }
 
+@members {
+boolean isAlias = false;
+}
+
 file
-    : alias* program EOF
+    : {isAlias = true;} alias* {isAlias = false;} program EOF
     ;
 
 alias
-    : program ALIAS theAlias=element_type WHITESPACE*
+    : program ALIAS theAlias=element WHITESPACE*
     ;
 
 program
@@ -17,7 +21,7 @@ program
     ;
 
 program_node
-    : statement | literal | element
+    : statement | literal | modifier | element
     ;
 
 literal
@@ -26,7 +30,6 @@ literal
     | compressed_number
     | complex_number
     | list
-    | constant
     ;
 
 string
@@ -37,7 +40,7 @@ string
     ;
 
 number
-    : integer (PERIOD integer)?
+    : MINUS? integer (PERIOD integer)?
     ;
 
 integer
@@ -54,10 +57,6 @@ complex_number
 
 list
     : LIST_OPEN program (PIPE program)* LIST_CLOSE?
-    ;
-
-constant
-    : CONSTANT_PREFIX (element_type | DIGIT)
     ;
 
 statement
@@ -104,23 +103,23 @@ three_element_lambda
     : THREE_ELEMENT_LAMBDA program_node program_node program_node
     ;
 
-parameter
-    : STAR | variable | integer
-    ;
-
 variable_assn
     : ASSN_SIGN variable
     ;
 
 variable
-    : (ALPHA | DIGIT | CONSTANT_PREFIX | CONTEXT_VAR)+
+    : (ALPHA | DIGIT | CONTEXT_VAR)+
     ;
 
-element
-    : MODIFIER? PREFIX? element_type
+modifier
+    : MODIFIER program_node
+    ;
+
+element locals [boolean isInAlias]
+    : PREFIX? element_type {$isInAlias = isAlias;}
     ;
 
 element_type
-    : ALPHA | NON_ALPHA_ELEMENT | CONTEXT_VAR
+    : ALPHA | LITERALLY_ANY_TEXT | CONTEXT_VAR | DIGIT | MODIFIER | MINUS
     ;
 

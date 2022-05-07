@@ -1,4 +1,4 @@
-package io.github.seggan.myxal.app.compiler.wrappers
+package io.github.seggan.myxal.compiler.jvm.wrappers
 
 import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes

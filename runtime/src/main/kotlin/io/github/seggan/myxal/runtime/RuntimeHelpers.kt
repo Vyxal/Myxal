@@ -51,12 +51,6 @@ fun applyLambda(lambda: Lambda, obj: Any): Any {
     }
 }
 
-fun copy(obj: Any): Any {
-    return if (obj is JyxalList) {
-        obj.map(::copy)
-    } else obj
-}
-
 fun exec(expr: String): Any {
     val stack = ProgramStack()
     for (e in jShell.eval(jShell.sourceCodeAnalysis().analyzeCompletion(expr).source())) {

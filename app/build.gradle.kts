@@ -15,11 +15,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":runtime"))
-
-    implementation("org.ow2.asm:asm:9.3")
-    implementation("org.ow2.asm:asm-commons:9.3")
-    implementation("org.ow2.asm:asm-util:9.3")
+    implementation(project(":compiler"))
 
     implementation("com.guardsquare:proguard-base:7.2.1")
 
@@ -27,6 +23,8 @@ dependencies {
 }
 
 val dest = JPath.of("$buildDir/runtimeClasses")
+
+version = "0.6.0"
 
 application {
     // Define the main class for the application.
@@ -106,5 +104,5 @@ tasks.shadowJar {
         include("LICENSE")
     }
 
-    archiveFileName.set("Myxal.jar")
+    archiveFileName.set("Myxal-${project.version}.jar")
 }

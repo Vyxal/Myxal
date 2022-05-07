@@ -1,11 +1,12 @@
-package io.github.seggan.myxal.app.compiler
+package io.github.seggan.myxal.compiler.jvm
 
-import io.github.seggan.myxal.app.compiler.wrappers.MyxalMethod
+import io.github.seggan.myxal.compiler.jvm.wrappers.MyxalMethod
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 
 object AsmHelper : Opcodes {
-    fun addBigDecimal(number: String?, mv: MethodVisitor) {
+
+    fun addBigDecimal(number: String, mv: MethodVisitor) {
         mv.visitTypeInsn(Opcodes.NEW, "java/math/BigDecimal")
         mv.visitInsn(Opcodes.DUP)
         mv.visitLdcInsn(number)
@@ -18,7 +19,7 @@ object AsmHelper : Opcodes {
         )
     }
 
-    fun addBigComplex(number: String?, mv: MethodVisitor) {
+    fun addBigComplex(number: String, mv: MethodVisitor) {
         addBigDecimal(number, mv)
         mv.visitMethodInsn(
             Opcodes.INVOKESTATIC,
@@ -30,6 +31,8 @@ object AsmHelper : Opcodes {
     }
 
     fun push(mv: MyxalMethod) {
+        mv.loadStack()
+        mv.visitInsn(Opcodes.SWAP)
         mv.visitMethodInsn(
             Opcodes.INVOKEVIRTUAL,
             "runtime/ProgramStack",

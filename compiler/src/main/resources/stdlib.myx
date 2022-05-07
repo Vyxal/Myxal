@@ -1,0 +1,82 @@
+"*"¢×
+" "¢ð
+-1¢u
+10¢₀
+100¢₁
+26¢₄
+64¢₆
+128¢₇
+256¢₈
+"\n"¢¶
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ"¢kA
+2.71828182845904523536028747135266249775724709369995¢ke
+"Fizz"¢kf
+"Buzz"¢kb
+"FizzBuzz"¢kF
+"Hello, World!"¢kH
+"Hello World"¢kh
+1000¢k1
+10000¢k2
+100000¢k3
+1000000¢k4
+"abcdefghijklmnopqrstuvwxyz"¢ka
+"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"¢kL
+"0123456789"¢kd
+"0123456789abcdef"¢k6
+"0123456789ABCDEF"¢k^
+"01234567"¢ko
+"!\"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~"¢kp
+string(
+    "kP",
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\u000b\u000c"
+)
+" \t\n\r\u000b\u000c"¢kw
+"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"¢kr
+"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"¢kB
+"ZYXWVUTSRQPONMLKJIHGFEDCBA"¢kZ
+"zyxwvutsrqponmlkjihgfedcba"¢kz
+"zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA"¢kl
+3.14159265358979323846264338327950288419716939937510¢ki
+"NaN"¢kn
+1.61803398874989484820458683436563811772030917980576¢kg
+"{}[]<>()"¢kβ
+"()[]{}"¢kḂ
+"()[]"¢kß
+"([{"¢kḃ
+")]}"¢k≥
+"([{<"¢k≤
+")]}>"¢kΠ
+"aeiou"¢kO
+"AEIOU"¢kV
+"aeiouAEIOU"¢k∨
+"λƛ¬∧⟑∨⟇÷×«
+ »°•ß†€½∆ø↔¢⌐æʀʁɾɽÞƈ∞¨ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]`^_abcdefghijklmnopqrstuvwxyz{|}~↑↓∴∵›‹∷¤ð→←βτȧḃċḋėḟġḣḭŀṁṅȯṗṙṡṫẇẋẏż√⟨⟩‛₀₁₂₃₄₅₆₇₈¶⁋§ε¡∑¦≈µȦḂĊḊĖḞĠḢİĿṀṄȮṖṘṠṪẆẊẎŻ₌₍⁰¹²∇⌈⌊¯±₴…□↳↲⋏⋎꘍ꜝ℅≤≥≠⁼ƒɖ∪∩⊍£¥⇧⇩ǍǎǏǐǑǒǓǔ⁽‡≬⁺↵⅛¼¾Π„‟"¢k⟇
+4294967296¢kḭ
+"/\\"¢k/
+360¢kR
+"https://"¢kW
+"http://"¢k℅
+"https://www."¢k↳
+"http://www."¢k²
+512¢k¶
+1024¢k⁋
+2048¢k¦
+4096¢kṄ
+8192¢kṅ
+16384¢k¡
+32768¢kε
+65536¢k₴
+2147483648¢k×
+"bcdfghjklmnpqrstvwxyz"¢k⁰
+"bcdfghjklmnpqrstvwxz"¢k¹
+"[]<>-+.,"¢kT
+"([{<>}])"¢kṖ
+"ඞ"¢kS
+1048576¢k₂
+1073741824¢k₃
+"aeiouy"¢k∪
+"AEIOUY"¢k⊍
+"aeiouyAEIOUY"¢k∩
+"IVXLCDM"¢kṘ
+
+`,¢…

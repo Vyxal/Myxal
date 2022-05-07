@@ -1,4 +1,4 @@
-package io.github.seggan.myxal.app.compiler.wrappers
+package io.github.seggan.myxal.compiler.jvm.wrappers
 
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Label
@@ -31,7 +31,7 @@ class MainMethod internal constructor(cw: ClassWriter, access: Int, name: String
         )
         visitVarInsn(Opcodes.ASTORE, ctxVar)
         visitLabel(start)
-        visitLocalVariable("stack", "Lio/github/seggan/jyxal/runtime/ProgramStack;", null, start, end, stackVar)
+        visitLocalVariable("stack", "Lio/github/seggan/myxal/runtime/ProgramStack;", null, start, end, stackVar)
         visitLocalVariable("ctx", "Ljava/lang/Object;", null, start, end, ctxVar)
     }
 }

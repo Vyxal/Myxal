@@ -22,3 +22,5 @@ build/
 # And my testing files
 test*.jar
 test.myx
+
+gen/

@@ -8,4 +8,4 @@
  */
 
 rootProject.name = "Myxal"
-include("app", "runtime", "native")
+include("app", "compiler", "runtime", "native")
