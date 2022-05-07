@@ -29,7 +29,24 @@ import java.util.ArrayDeque
 
 class JvmCompiler(options: CommandLine) : ICompiler<ByteArray>(options) {
 
-    private val callStack = CallStack(ArrayDeque())
+    private val callStack = object : ArrayDeque<MyxalMethod>() {
+        private var top: MyxalMethod? = null
+
+        override fun peek(): MyxalMethod {
+            return top!!
+        }
+
+        override fun push(e: MyxalMethod) {
+            top = e
+            super.push(e)
+        }
+
+        override fun pop(): MyxalMethod {
+            val e = super.pop()
+            top = super.peek()
+            return e
+        }
+    }
     private val loopStack = object : ArrayDeque<Loop>() {
         override fun peek(): Loop {
             return super.peek() ?: throw IllegalStateException("Illegal use of break/continue outside of loop")

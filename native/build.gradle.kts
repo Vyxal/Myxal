@@ -3,5 +3,6 @@
  */
 
 plugins {
-
+    `cpp-library`
+    id("io.github.seggan.myxal.kotlin-application-conventions")
 }

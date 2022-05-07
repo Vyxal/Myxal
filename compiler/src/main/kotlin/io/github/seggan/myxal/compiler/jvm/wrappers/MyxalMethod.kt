@@ -1,6 +1,6 @@
 package io.github.seggan.myxal.compiler.jvm.wrappers
 
-import io.github.seggan.myxal.app.compiler.optimise
+import io.github.seggan.myxal.compiler.jvm.optimise
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes

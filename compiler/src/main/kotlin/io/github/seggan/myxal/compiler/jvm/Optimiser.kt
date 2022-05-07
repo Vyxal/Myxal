@@ -1,9 +1,7 @@
-package io.github.seggan.myxal.app.compiler
+package io.github.seggan.myxal.compiler.jvm
 
 import io.github.seggan.myxal.compiler.jvm.wrappers.MyxalMethod
-import org.objectweb.asm.Opcodes.ALOAD
-import org.objectweb.asm.Opcodes.INVOKEVIRTUAL
-import org.objectweb.asm.Opcodes.SWAP
+import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.Type
 import org.objectweb.asm.tree.AbstractInsnNode
 import org.objectweb.asm.tree.InsnList
