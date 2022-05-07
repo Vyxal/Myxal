@@ -120,6 +120,6 @@ element locals [boolean isInAlias]
     ;
 
 element_type
-    : ALPHA | LITERALLY_ANY_TEXT | CONTEXT_VAR | DIGIT | MODIFIER | MINUS
+    : ALPHA | LITERALLY_ANY_TEXT | CONTEXT_VAR | DIGIT | MODIFIER | MINUS | STAR
     ;
 

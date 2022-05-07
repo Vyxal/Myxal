@@ -4,5 +4,12 @@
 
 plugins {
     `cpp-library`
-    id("io.github.seggan.myxal.kotlin-application-conventions")
+}
+
+val pathToLLVM = "C:\\Program Files\\LLVM"
+
+library {
+    dependencies {
+        implementation(files("$pathToLLVM\\lib\\LLVM-C.lib"))
+    }
 }
