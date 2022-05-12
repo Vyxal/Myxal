@@ -11,6 +11,7 @@ class MyxalNumber;
 class MyxalList;
 
 class MyxalType {
+    friend void runGC(std::vector<MyxalType *> &stack);
     public:
         virtual bool isList();
         virtual bool isNumber();
@@ -20,6 +21,8 @@ class MyxalType {
         virtual MyxalNumber *asNumber();
         virtual MyxalList *asList();
 
+        virtual void mark(bool mark = true);
+    protected:
         bool marked = false;
 };
 
@@ -55,7 +58,6 @@ class MyxalList : public MyxalType {
         MyxalList(MyxalList &other);
         MyxalList(std::vector<MyxalType *> values);
         MyxalList(std::function<MyxalType *()> generator);
-        ~MyxalList();
 
         bool isList();
 
@@ -93,12 +95,14 @@ class MyxalList : public MyxalType {
         
         MyxalList *map(std::function<MyxalType *(MyxalType *)> func);
 
-        MyxalType *depend = nullptr;
+        void mark(bool mark = true);
     private:
         MyxalList(size_t size);
         std::vector<MyxalType *> backing;
         std::function<MyxalType *()> generator;
         bool isDone;
+
+        MyxalType *depend = nullptr;
 
         void fill(size_t targetSize);
 };

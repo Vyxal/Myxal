@@ -12,6 +12,10 @@ bool MyxalType::isString() {
     return false;
 }
 
+void MyxalType::mark(bool mark) {
+    marked = mark;
+}
+
 MyxalNumber *MyxalType::asNumber() {
     MyxalNumber *number = dynamic_cast<MyxalNumber *>(this);
     if (number) {
@@ -157,12 +161,6 @@ MyxalList::MyxalList(size_t size) {
     registerForGC(this);
 }
 
-MyxalList::~MyxalList() {
-    for (auto &item : backing) {
-        delete item;
-    }
-}
-
 size_t MyxalList::size() {
     if (isDone) {
         return backing.size();
@@ -273,4 +271,12 @@ bool MyxalList::iterator::operator!=(MyxalList::iterator &other) {
 
 MyxalList::iterator MyxalList::begin() {
     return MyxalList::iterator(this, 0);
+}
+
+void MyxalList::mark(bool mark) {
+    marked = mark;
+    for (auto &item : backing) {
+        item->mark(mark);
+    }
+    depend->mark(mark);
 }
