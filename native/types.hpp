@@ -11,7 +11,6 @@ class MyxalNumber;
 class MyxalList;
 
 class MyxalType {
-    friend void runGC(std::vector<MyxalType *> &stack);
     public:
         virtual bool isList();
         virtual bool isNumber();
@@ -22,7 +21,6 @@ class MyxalType {
         virtual MyxalList *asList();
 
         virtual void mark(bool mark = true);
-    protected:
         bool marked = false;
 };
 

@@ -3,11 +3,17 @@
 
 #include <vector>
 #include "types.hpp"
+#include "myxal_stack.hpp"
 
-std::vector<MyxalType *> &getStack();
+MyxalStack &getStack();
+void enterFunction();
+void exitFunction();
 
 MyxalType *&getContext();
 void enterScope(MyxalType *context);
 void exitScope();
+
+void push(MyxalStack &stack = getStack());
+MyxalType *pop(MyxalStack &stack = getStack());
 
 #endif // PROG_HPP_INCLUDE

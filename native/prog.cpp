@@ -1,11 +1,19 @@
 #include <stack>
 #include "prog.hpp"
 
-std::vector<MyxalType *> stack;
+std::stack<MyxalStack> stackStack;
 std::stack<MyxalType *> scopeStack;
 
-std::vector<MyxalType *> &getStack() {
-    return stack;
+MyxalStack &getStack() {
+    return stackStack.top();
+}
+
+void enterFunction() {
+    stackStack.push(MyxalStack());
+}
+
+void exitFunction() {
+    stackStack.pop();
 }
 
 MyxalType *&getContext() {
@@ -18,4 +26,12 @@ void enterScope(MyxalType *context) {
 
 void exitScope() {
     scopeStack.pop();
+}
+
+void push(MyxalType *value, MyxalStack &stack) {
+    stack.push(value);
+}
+
+MyxalType *pop(MyxalStack &stack) {
+    return stack.pop();
 }

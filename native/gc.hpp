@@ -7,6 +7,6 @@ class MyxalType;
 
 void registerForGC(MyxalType *type);
 
-void runGC(std::vector<MyxalType *> &stack);
+void runGC(MyxalStack &stack);
 
 #endif // GC_HPP_INCLUDE
