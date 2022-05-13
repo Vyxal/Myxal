@@ -9,11 +9,11 @@ MyxalStack &getStack();
 void enterFunction();
 void exitFunction();
 
-MyxalType *&getContext();
-void enterScope(MyxalType *context);
+type &getContext();
+void enterScope(type context);
 void exitScope();
 
 void push(MyxalStack &stack = getStack());
-MyxalType *pop(MyxalStack &stack = getStack());
+type pop(MyxalStack &stack = getStack());
 
 #endif // PROG_HPP_INCLUDE

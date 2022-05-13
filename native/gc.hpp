@@ -2,10 +2,14 @@
 #define GC_HPP_INCLUDE
 
 #include <vector>
+#include <memory>
+#include "myxal_stack.hpp"
 
 class MyxalType;
 
-void registerForGC(MyxalType *type);
+typedef std::shared_ptr<MyxalType> type;
+
+void registerForGC(type type);
 
 void runGC(MyxalStack &stack);
 

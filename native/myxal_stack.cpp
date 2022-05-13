@@ -1,22 +1,22 @@
-#include "jyxal_stack.hpp"
+#include "myxal_stack.hpp"
 
 MyxalStack::MyxalStack() {
 }
 
-std::vector<MyxalType *>::iterator MyxalStack::begin() {
+std::vector<type>::iterator MyxalStack::begin() {
     return stack.begin();
 }
 
-std::vector<MyxalType *>::iterator MyxalStack::end() {
+std::vector<type>::iterator MyxalStack::end() {
     return stack.end();
 }
 
-void MyxalStack::push(MyxalType *value) {
+void MyxalStack::push(type value) {
     stack.push_back(value);
 }
 
-MyxalType *MyxalStack::pop() {
-    MyxalType *ret = stack.back();
+type MyxalStack::pop() {
+    type ret = stack.back();
     stack.pop_back();
     return ret;
 }

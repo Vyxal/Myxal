@@ -16,8 +16,8 @@ void MyxalType::mark(bool mark) {
     marked = mark;
 }
 
-MyxalNumber *MyxalType::asNumber() {
-    MyxalNumber *number = dynamic_cast<MyxalNumber *>(this);
+number MyxalType::asNumber() {
+    number number = std::dynamic_pointer_cast<MyxalNumber>(shared_from_this());
     if (number) {
         return number;
     } else {
@@ -25,8 +25,8 @@ MyxalNumber *MyxalType::asNumber() {
     }
 }
 
-MyxalList *MyxalType::asList() {
-    MyxalList *list = dynamic_cast<MyxalList *>(this);
+list MyxalType::asList() {
+    list list = std::dynamic_pointer_cast<MyxalList>(shared_from_this());
     if (list) {
         return list;
     } else {
@@ -34,25 +34,34 @@ MyxalList *MyxalType::asList() {
     }
 }
 
+MyxalNumber::MyxalNumber(int value) : MyxalNumber(static_cast<long long>(value)) {
+}
+
 MyxalNumber::MyxalNumber(long long value) {
     this->value = value;
     this->isWholeNumber = true;
     this->decimal = 0;
-    registerForGC(this);
+    registerForGC(shared_from_this());
+}
+
+MyxalNumber::MyxalNumber(double value) : MyxalNumber(static_cast<long double>(value)) {
 }
 
 MyxalNumber::MyxalNumber(long double value) {
     this->value = 0;
     this->isWholeNumber = false;
     this->decimal = value;
-    registerForGC(this);
+    registerForGC(shared_from_this());
+}
+
+MyxalNumber::MyxalNumber(bool value) : MyxalNumber(value ? 1 : 0) {
 }
 
 MyxalNumber::MyxalNumber(MyxalNumber &other) {
     this->value = other.value;
     this->isWholeNumber = other.isWholeNumber;
     this->decimal = other.decimal;
-    registerForGC(this);
+    registerForGC(shared_from_this());
 }
 
 long long MyxalNumber::asWhole() {
@@ -87,49 +96,56 @@ std::string MyxalNumber::asString() {
     }
 }
 
-MyxalNumber *MyxalNumber::operator+(MyxalNumber &other) {
+number MyxalNumber::operator+(MyxalNumber &other) {
     if (this->isWholeNumber && other.isWholeNumber) {
-        return new MyxalNumber(this->value + other.value);
+        return std::make_shared<MyxalNumber>(this->value + other.value);
     } else {
         // The rest are gonna end up as decimals
-        return new MyxalNumber(this->asDecimal() + other.asDecimal());
+        return std::make_shared<MyxalNumber>(this->asDecimal() + other.asDecimal());
     }
 }
 
-MyxalNumber *MyxalNumber::operator-(MyxalNumber &other) {
+number MyxalNumber::operator-(MyxalNumber &other) {
     if (this->isWholeNumber && other.isWholeNumber) {
-        return new MyxalNumber(this->value - other.value);
+        return std::make_shared<MyxalNumber>(this->value - other.value);
     } else {
         // The rest are gonna end up as decimals
-        return new MyxalNumber(this->asDecimal() - other.asDecimal());
+        return std::make_shared<MyxalNumber>(this->asDecimal() - other.asDecimal());
     }
 }
 
-MyxalNumber *MyxalNumber::operator*(MyxalNumber &other) {
+number MyxalNumber::operator*(MyxalNumber &other) {
     if (this->isWholeNumber && other.isWholeNumber) {
-        return new MyxalNumber(this->value * other.value);
+        return std::make_shared<MyxalNumber>(this->value * other.value);
     } else {
         // The rest are gonna end up as decimals
-        return new MyxalNumber(this->asDecimal() * other.asDecimal());
+        return std::make_shared<MyxalNumber>(this->asDecimal() * other.asDecimal());
     }
 }
 
-MyxalNumber *MyxalNumber::operator/(MyxalNumber &other) {
+number MyxalNumber::operator/(MyxalNumber &other) {
     // We want float division here
-    return new MyxalNumber(this->asDecimal() / other.asDecimal());
+    return std::make_shared<MyxalNumber>(this->asDecimal() / other.asDecimal());
 }
 
-MyxalNumber *MyxalNumber::operator%(MyxalNumber &other) {
+number MyxalNumber::operator%(MyxalNumber &other) {
     // Mod only works on integers
-    return new MyxalNumber(this->asWhole() % other.asWhole());
+    return std::make_shared<MyxalNumber>(this->asWhole() % other.asWhole());
 }
 
 
 // List
 MyxalList::MyxalList() {
-    registerForGC(this);
+    registerForGC(shared_from_this());
     this->generator = [] { return nullptr; };
     this->isDone = true;
+}
+
+MyxalList::~MyxalList() {
+    for (auto &item : this->backing) {
+        item.reset();
+    }
+    depend.reset();
 }
 
 MyxalList::MyxalList(MyxalList &other) : MyxalList(other.size()) {
@@ -140,38 +156,42 @@ MyxalList::MyxalList(MyxalList &other) : MyxalList(other.size()) {
     this->isDone = other.isDone;
 }
 
-MyxalList::MyxalList(std::vector<MyxalType *> values) {
+MyxalList::MyxalList(std::vector<type> values) {
     this->backing = backing;
     this->generator = [] { return nullptr; };
     this->isDone = true;
-    registerForGC(this);
+    registerForGC(shared_from_this());
 }
 
-MyxalList::MyxalList(std::function<MyxalType *()> generator) {
-    this->backing = std::vector<MyxalType *>();
+MyxalList::MyxalList(std::function<type()> generator) {
+    this->backing = std::vector<type>();
     this->generator = generator;
     this->isDone = false;
-    registerForGC(this);
+    registerForGC(shared_from_this());
 }
 
 MyxalList::MyxalList(size_t size) {
     this->backing.reserve(size);
     this->generator = [] { return nullptr; };
     this->isDone = true;
-    registerForGC(this);
+    registerForGC(shared_from_this());
 }
 
 size_t MyxalList::size() {
     if (isDone) {
         return backing.size();
     } else {
-        MyxalType *item;
+        type item;
         while ((item = generator()) != nullptr) {
             backing.push_back(item);
         }
         isDone = true;
         return backing.size();
     }
+}
+
+bool MyxalList::isEmpty() {
+    return backing.empty() && isDone;
 }
 
 bool MyxalList::isList() {
@@ -183,7 +203,7 @@ bool MyxalList::hasIndex(size_t index) {
     return index < backing.size();
 }
 
-MyxalType *MyxalList::operator[](int index) {
+type MyxalList::operator[](int index) {
     fill(index);
     return backing[index];
 }
@@ -202,8 +222,8 @@ std::string MyxalList::asString() {
     return result;
 }
 
-MyxalList *MyxalList::operator+(MyxalList &other) {
-    MyxalList *result = new MyxalList(this->backing.size() + other.backing.size());
+list MyxalList::operator+(MyxalList &other) {
+    list result = std::make_shared<MyxalList>(this->backing.size() + other.backing.size());
     for (auto &item : this->backing) {
         result->backing.push_back(item);
     }
@@ -213,8 +233,8 @@ MyxalList *MyxalList::operator+(MyxalList &other) {
     return result;
 }
 
-MyxalList *MyxalList::operator+(MyxalType *other) {
-    MyxalList *result = new MyxalList(this->backing.size() + 1);
+list MyxalList::operator+(type other) {
+    list result = std::make_shared<MyxalList>(this->backing.size() + 1);
     for (auto &item : this->backing) {
         result->backing.push_back(item);
     }
@@ -222,21 +242,21 @@ MyxalList *MyxalList::operator+(MyxalType *other) {
     return result;
 }
 
-MyxalList *MyxalList::map(std::function<MyxalType *(MyxalType *)> func) {
+list MyxalList::map(std::function<type(type)> func) {
     size_t index = 0;
-    MyxalList *result = new MyxalList([&] () -> MyxalType * {
+    list result = std::make_shared<MyxalList>([&] () -> type {
         if (!hasIndex(index)) {
             return nullptr;
         }
         return func(backing[index++]);
     });
-    result->depend = this;
+    result->depend = shared_from_this();
     return result;
 }
 
 void MyxalList::fill(size_t targetSize) {
     if (!isDone) {
-        MyxalType *item;
+        type item;
         while (backing.size() <= targetSize) {
             if ((item = generator()) == nullptr) {
                 isDone = true;
@@ -247,12 +267,12 @@ void MyxalList::fill(size_t targetSize) {
     }
 }
 
-MyxalList::iterator::iterator(MyxalList *list, size_t index) {
+MyxalList::iterator::iterator(std::shared_ptr<MyxalList> list, size_t index) {
     this->list = list;
     this->index = index;
 }
 
-MyxalType *MyxalList::iterator::operator*() {
+type MyxalList::iterator::operator*() {
     return list->backing[index];
 }
 
@@ -270,7 +290,7 @@ bool MyxalList::iterator::operator!=(MyxalList::iterator &other) {
 }
 
 MyxalList::iterator MyxalList::begin() {
-    return MyxalList::iterator(this, 0);
+    return MyxalList::iterator(asList(), 0);
 }
 
 void MyxalList::mark(bool mark) {

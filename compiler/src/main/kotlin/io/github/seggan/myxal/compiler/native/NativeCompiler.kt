@@ -11,27 +11,34 @@ import io.github.seggan.myxal.compiler.tree.ListNode
 import io.github.seggan.myxal.compiler.tree.Node
 import io.github.seggan.myxal.compiler.tree.NumNode
 import io.github.seggan.myxal.compiler.tree.WhileNode
+import io.github.seggan.myxal.compiler.util.CallStack
 import org.apache.commons.cli.CommandLine
 
 const val TEMPLATE = """
 #include <iostream>
 #include "lib/prog.hpp"
+#include "lib/helpers.cpp" // this is non-standard, but im too lazy to write all those headers
+
+%s
 
 int main(int argc, char **argv) {
 enterFunction();
 %s
-cout << pop() << endl;
+cout << pop()->asString() << endl;
 return 0;
 }
 """
 
 class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
 
-    private val code = StringBuilder()
+    private val callStack = CallStack<StringBuilder>()
+    private val functions = mutableListOf<String>()
 
     override fun compile(ast: List<Node>): String {
+        val main = StringBuilder()
+        callStack.push(main)
         visit(ast)
-        return TEMPLATE.format(code)
+        return TEMPLATE.format(functions.joinToString("\n"), main)
     }
 
     override fun visitElement(element: Element) {
@@ -39,11 +46,24 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
     }
 
     override fun visitIf(node: IfNode) {
-        TODO("Not yet implemented")
+        code.appendLine("if (truthValue(pop())) {")
+        visit(node.ifBlock)
+        if (node.elseBlock != null) {
+            code.appendLine("} else {")
+            visit(node.elseBlock)
+        }
+        code.appendLine("}")
     }
 
     override fun visitWhile(node: WhileNode) {
-        TODO("Not yet implemented")
+        if (node.condition != null) {
+            val label =
+                code.appendLine("")
+        } else {
+            code.appendLine("while (true) {")
+            visit(node.body)
+            code.appendLine("}")
+        }
     }
 
     override fun visitFor(node: ForNode) {
@@ -117,4 +137,8 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
     override fun stackSize() {
         TODO("Not yet implemented")
     }
+}
+
+fun StringBuilder.appendLine(line: String) {
+    append(line).append("\n")
 }

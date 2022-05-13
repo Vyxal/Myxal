@@ -8,14 +8,14 @@ class MyxalStack {
     public:
         MyxalStack();
 
-        std::vector<MyxalType *>::iterator begin();
-        std::vector<MyxalType *>::iterator end();
+        std::vector<type>::iterator begin();
+        std::vector<type>::iterator end();
 
-        void push(MyxalType *value);
-        MyxalType *pop();
+        void push(type value);
+        type pop();
 
     private:
-        std::vector<MyxalType *> stack;
+        std::vector<type> stack;
 };
 
 #endif // JYXAL_STACK_HPP_INCLUDE

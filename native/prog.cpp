@@ -2,7 +2,7 @@
 #include "prog.hpp"
 
 std::stack<MyxalStack> stackStack;
-std::stack<MyxalType *> scopeStack;
+std::stack<type> scopeStack;
 
 MyxalStack &getStack() {
     return stackStack.top();
@@ -16,11 +16,11 @@ void exitFunction() {
     stackStack.pop();
 }
 
-MyxalType *&getContext() {
+type& getContext() {
     return scopeStack.top();
 }
 
-void enterScope(MyxalType *context) {
+void enterScope(type context) {
     scopeStack.push(context);
 }
 
@@ -28,10 +28,10 @@ void exitScope() {
     scopeStack.pop();
 }
 
-void push(MyxalType *value, MyxalStack &stack) {
+void push(type value, MyxalStack &stack) {
     stack.push(value);
 }
 
-MyxalType *pop(MyxalStack &stack) {
+type pop(MyxalStack &stack) {
     return stack.pop();
 }
