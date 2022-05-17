@@ -3,13 +3,13 @@
 
 #include <vector>
 #include <memory>
-#include "myxal_stack.hpp"
 
 class MyxalType;
+class MyxalStack;
 
-typedef std::shared_ptr<MyxalType> type;
+typedef std::shared_ptr<MyxalType> mtype;
 
-void registerForGC(type type);
+void registerForGC(mtype type);
 
 void runGC(MyxalStack &stack);
 

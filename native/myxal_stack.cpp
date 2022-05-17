@@ -3,20 +3,24 @@
 MyxalStack::MyxalStack() {
 }
 
-std::vector<type>::iterator MyxalStack::begin() {
+std::vector<mtype>::iterator MyxalStack::begin() {
     return stack.begin();
 }
 
-std::vector<type>::iterator MyxalStack::end() {
+std::vector<mtype>::iterator MyxalStack::end() {
     return stack.end();
 }
 
-void MyxalStack::push(type value) {
+void MyxalStack::push(mtype value) {
     stack.push_back(value);
 }
 
-type MyxalStack::pop() {
-    type ret = stack.back();
+mtype MyxalStack::pop() {
+    mtype ret = stack.back();
     stack.pop_back();
     return ret;
+}
+
+size_t MyxalStack::size() {
+    return stack.size();
 }

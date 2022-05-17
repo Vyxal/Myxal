@@ -2,20 +2,22 @@
 #define JYXAL_STACK_HPP_INCLUDE
 
 #include <vector>
-#include "types.hpp"
+#include "gc.hpp"
 
 class MyxalStack {
     public:
         MyxalStack();
 
-        std::vector<type>::iterator begin();
-        std::vector<type>::iterator end();
+        std::vector<mtype>::iterator begin();
+        std::vector<mtype>::iterator end();
 
-        void push(type value);
-        type pop();
+        void push(mtype value);
+        mtype pop();
+
+        size_t size();
 
     private:
-        std::vector<type> stack;
+        std::vector<mtype> stack;
 };
 
 #endif // JYXAL_STACK_HPP_INCLUDE

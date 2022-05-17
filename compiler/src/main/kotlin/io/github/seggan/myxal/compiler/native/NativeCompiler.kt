@@ -12,19 +12,33 @@ import io.github.seggan.myxal.compiler.tree.Node
 import io.github.seggan.myxal.compiler.tree.NumNode
 import io.github.seggan.myxal.compiler.tree.WhileNode
 import io.github.seggan.myxal.compiler.util.CallStack
+import io.github.seggan.myxal.compiler.util.screamingSnakeCaseToCamelCase
+import io.github.seggan.myxal.runtime.escapeString
+import io.github.seggan.myxal.runtime.times
 import org.apache.commons.cli.CommandLine
 
 const val TEMPLATE = """
 #include <iostream>
-#include "lib/prog.hpp"
-#include "lib/helpers.cpp" // this is non-standard, but im too lazy to write all those headers
+#include <string>
+#include "prog.hpp"
+#include "types.hpp"
+#include "helpers.hpp"
+#include "elements.hpp"
 
 %s
 
 int main(int argc, char **argv) {
 enterFunction();
+try {
 %s
-cout << pop()->asString() << endl;
+} catch (char *e) {
+if (e == "exit") {
+return 0;
+} else {
+throw e;
+}
+}
+std::cout << pop()->asString() << std::endl;
 return 0;
 }
 """
@@ -32,7 +46,11 @@ return 0;
 class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
 
     private val callStack = CallStack<StringBuilder>()
+    private val code: StringBuilder
+        get() = callStack.peek()
     private val functions = mutableListOf<String>()
+
+    private var counter = 0
 
     override fun compile(ast: List<Node>): String {
         val main = StringBuilder()
@@ -42,7 +60,20 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
     }
 
     override fun visitElement(element: Element) {
-        TODO("Not yet implemented")
+        if (element == Element.PRINT || element == Element.PRINTLN) {
+            code.append("std::cout << pop()->asString()")
+            if (element == Element.PRINTLN) {
+                code.append(" << \"\\n\"")
+            }
+            code.appendLine(';')
+        } else {
+            val list = listOf("pop()") * element.arity
+            code.append("push(")
+            code.append(screamingSnakeCaseToCamelCase(element.name))
+            code.append("(")
+            code.append(list.joinToString(", "))
+            code.appendLine("));")
+        }
     }
 
     override fun visitIf(node: IfNode) {
@@ -56,14 +87,26 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
     }
 
     override fun visitWhile(node: WhileNode) {
+        code.appendLine("enterScope(mt::mnumber(1));")
         if (node.condition != null) {
-            val label =
-                code.appendLine("")
+            val label = "lbl_${counter++}:"
+            val end = "lbl_${counter++}"
+            code.appendLine(label)
+            visit(node.condition)
+            code.appendLine("if (!truthValue(pop())) {")
+            code.appendLine("goto $end")
+            code.appendLine("}")
+            visit(node.body)
+            code.appendLine("context() = context()->asNumber()->add(1);")
+            code.appendLine("goto $label")
+            code.appendLine(end)
         } else {
             code.appendLine("while (true) {")
             visit(node.body)
+            code.appendLine("context() = context()->asNumber()->add(1);")
             code.appendLine("}")
         }
+        code.appendLine("exitScope();")
     }
 
     override fun visitFor(node: ForNode) {
@@ -71,19 +114,21 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
     }
 
     override fun visitForI(node: ForINode) {
-        TODO("Not yet implemented")
+        code.appendLine("for (long i = 0; i < ${node.times}; i++) {")
+        visit(node.body)
+        code.appendLine("}")
     }
 
     override fun loadContext() {
-        TODO("Not yet implemented")
+        code.appendLine("push(context());")
     }
 
     override fun breakLoop() {
-        TODO("Not yet implemented")
+        code.appendLine("break;")
     }
 
     override fun continueLoop() {
-        TODO("Not yet implemented")
+        code.appendLine("continue;")
     }
 
     override fun input() {
@@ -91,7 +136,7 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
     }
 
     override fun exit() {
-        TODO("Not yet implemented")
+        code.appendLine("throw \"exit\";")
     }
 
     override fun loadVariable(name: String) {
@@ -111,15 +156,15 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
     }
 
     override fun visitString(value: String) {
-        TODO("Not yet implemented")
+        code.appendLine("push(mt::mstring(\"${escapeString(value)}\"));")
     }
 
     override fun visitNum(value: NumNode) {
-        TODO("Not yet implemented")
+        code.appendLine("push(mt::mnumber(${value.value}));")
     }
 
     override fun visitComplex(value: ComplexNode) {
-        TODO("Not yet implemented")
+        throw IllegalStateException("Myxal/native does not yet support complex numbers")
     }
 
     override fun visitList(value: ListNode) {
@@ -135,10 +180,6 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
     }
 
     override fun stackSize() {
-        TODO("Not yet implemented")
+        code.appendLine("push(mt::mnumber(getStack().size()));")
     }
-}
-
-fun StringBuilder.appendLine(line: String) {
-    append(line).append("\n")
 }

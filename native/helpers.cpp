@@ -1,15 +1,15 @@
-#include "types.hpp"
+#include "helpers.hpp"
 
-bool truthValue(type value) {
+bool truthValue(mtype value) {
     if (value->isNumber()) {
-        number number = value->asNumber();
+        number number = asNumber(value);
         if (number->isWhole()) {
             return number->asWhole() != 0;
         } else {
             return number->asDecimal() != 0;
         }
     } else if (value->isList()) {
-        return !value->asList()->isEmpty();
+        return !asList(value)->isEmpty();
     } else {
         return value->asString() != "";
     }

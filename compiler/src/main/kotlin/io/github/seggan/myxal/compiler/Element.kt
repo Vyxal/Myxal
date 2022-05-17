@@ -9,6 +9,7 @@ enum class Element(val text: String, val arity: Int, val vectorise: Boolean, val
     ADD("+", 2, true),
     BINARY("b", 1, true),
     COMPLEMENT("⌐", 1, true),
+    DECREMENT("‹", 1, true),
     DIVIDE("/", 2, true),
     DIV_FIVE("₅", 1, false),
     DIV_THREE("₃", 1, false),

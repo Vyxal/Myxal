@@ -16,6 +16,7 @@ import io.github.seggan.myxal.compiler.tree.Node
 import io.github.seggan.myxal.compiler.tree.NumNode
 import io.github.seggan.myxal.compiler.tree.WhileNode
 import io.github.seggan.myxal.compiler.util.CallStack
+import io.github.seggan.myxal.compiler.util.screamingSnakeCaseToCamelCase
 import org.apache.commons.cli.CommandLine
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
@@ -584,23 +585,5 @@ class JvmCompiler(options: CommandLine) : ICompiler<ByteArray>(options) {
             false
         )
         AsmHelper.push(mv)
-    }
-
-    private fun screamingSnakeCaseToCamelCase(s: String): String {
-        return buildString {
-            var upper = false
-            for (c in s) {
-                if (c == '_') {
-                    upper = true
-                } else {
-                    if (upper) {
-                        append(c.uppercaseChar())
-                        upper = false
-                    } else {
-                        append(c.lowercaseChar())
-                    }
-                }
-            }
-        }
     }
 }

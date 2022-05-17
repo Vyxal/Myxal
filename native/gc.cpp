@@ -2,10 +2,10 @@
 #include "types.hpp"
 #include "prog.hpp"
 
-std::vector<type> registeredObjects;
+std::vector<std::weak_ptr<MyxalType>> registeredObjects;
 int registerCounter = 0;
 
-void registerForGC(type type) {
+void registerForGC(mtype type) {
     registeredObjects.push_back(type);
     if (++registerCounter > 1000) {
         runGC(getStack());
@@ -17,13 +17,18 @@ void runGC(MyxalStack &stack) {
     for (auto &item : stack) {
         item->mark();
     }
-    std::vector<type> newVector;
+    std::vector<std::weak_ptr<MyxalType>> newVector;
     for (auto &item : registeredObjects) {
-        if (item->marked) {
-            newVector.push_back(item);
-            item->marked = false;
-        } else {
-            item.reset();
+        if (!item.expired()) {
+            mtype type = item.lock();
+            if (type->marked) {
+                type->marked = false;
+                newVector.push_back(item);
+            } else {
+                if (type->isList()) {
+                    asList(type)->freeAllReferences();
+                }
+            }
         }
     }
     registeredObjects = newVector;

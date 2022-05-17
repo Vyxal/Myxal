@@ -90,6 +90,14 @@ tasks.test {
 tasks.shadowJar {
     dependsOn("test")
 
+    doFirst {
+        val build = JPath.of("$buildDir")
+        val cppRes = build.resolve("cpp-resources.txt")
+        val resList =
+            File(rootProject.rootDir, "native").list { _, name -> name.endsWith(".cpp") || name.endsWith(".hpp") }
+        Files.write(cppRes, resList.toList())
+    }
+
     from(dest.toFile().path) {
         include("**/*.*")
     }
@@ -102,6 +110,14 @@ tasks.shadowJar {
 
     from(rootDir) {
         include("LICENSE")
+    }
+
+    from(File(rootProject.rootDir, "native")) {
+        include("**/*.*")
+    }
+
+    from(buildDir) {
+        include("cpp-resources.txt")
     }
 
     archiveFileName.set("Myxal-${project.version}.jar")
