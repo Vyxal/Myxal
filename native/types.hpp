@@ -134,6 +134,8 @@ namespace mt {
     number mnumber(double num);
     number mnumber(long double num);
     number mnumber(long long num);
+    number mfalse();
+    number mtrue();
     string mstring(std::string str);
     list mlist(std::vector<mtype> values);
     list mlist(std::function<mtype()> gen);

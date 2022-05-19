@@ -2,8 +2,8 @@ package io.github.seggan.myxal.app
 
 import io.github.seggan.myxal.antlr.MyxalLexer
 import io.github.seggan.myxal.antlr.MyxalParser
+import io.github.seggan.myxal.compiler.cpp.NativeCompiler
 import io.github.seggan.myxal.compiler.jvm.JvmCompiler
-import io.github.seggan.myxal.compiler.native.NativeCompiler
 import io.github.seggan.myxal.runtime.text.Compression
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream

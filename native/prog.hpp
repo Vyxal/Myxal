@@ -16,4 +16,6 @@ void exitScope();
 void push(mtype value, MyxalStack &stack = getStack());
 mtype pop(MyxalStack &stack = getStack());
 
+mtype &mregister();
+
 #endif // PROG_HPP_INCLUDE

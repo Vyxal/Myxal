@@ -15,8 +15,7 @@ class MyxalStack {
         mtype pop();
 
         size_t size();
-
-    private:
+        
         std::vector<mtype> stack;
 };
 

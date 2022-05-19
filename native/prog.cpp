@@ -4,6 +4,8 @@
 std::stack<MyxalStack> stackStack;
 std::stack<mtype> scopeStack;
 
+mtype theRegister = mt::mnumber(0);
+
 MyxalStack &getStack() {
     return stackStack.top();
 }
@@ -34,4 +36,8 @@ void push(mtype value, MyxalStack &stack) {
 
 mtype pop(MyxalStack &stack) {
     return stack.pop();
-} 
+}
+
+mtype &mregister() {
+    return theRegister;
+}

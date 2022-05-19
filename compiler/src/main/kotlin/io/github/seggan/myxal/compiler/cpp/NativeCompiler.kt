@@ -1,7 +1,8 @@
-package io.github.seggan.myxal.compiler.native
+package io.github.seggan.myxal.compiler.cpp
 
 import io.github.seggan.myxal.compiler.Element
 import io.github.seggan.myxal.compiler.ICompiler
+import io.github.seggan.myxal.compiler.tree.BlockNode
 import io.github.seggan.myxal.compiler.tree.ComplexNode
 import io.github.seggan.myxal.compiler.tree.ForINode
 import io.github.seggan.myxal.compiler.tree.ForNode
@@ -20,6 +21,7 @@ import org.apache.commons.cli.CommandLine
 const val TEMPLATE = """
 #include <iostream>
 #include <string>
+#include <algorithm>
 #include "prog.hpp"
 #include "types.hpp"
 #include "helpers.hpp"
@@ -148,11 +150,11 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
     }
 
     override fun loadRegister() {
-        TODO("Not yet implemented")
+        code.appendLine("push(mregister());")
     }
 
     override fun setRegister() {
-        TODO("Not yet implemented")
+        code.appendLine("mregister() = pop();")
     }
 
     override fun visitString(value: String) {
@@ -160,7 +162,8 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
     }
 
     override fun visitNum(value: NumNode) {
-        code.appendLine("push(mt::mnumber(${value.value}));")
+        val suffix = if (value.isDouble()) "L" else "LL"
+        code.appendLine("push(mt::mnumber(${value.value}$suffix));")
     }
 
     override fun visitComplex(value: ComplexNode) {
@@ -168,7 +171,29 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
     }
 
     override fun visitList(value: ListNode) {
-        TODO("Not yet implemented")
+        val varName = "temp${counter++}"
+        code.appendLine("std::vector<mtype> $varName;")
+        for (element in value.values) {
+            if (element is BlockNode) {
+                val funName = "listInit${counter++}"
+                val function = StringBuilder()
+                function.appendLine("mtype $funName() {")
+                function.appendLine("enterFunction();")
+                callStack.push(function)
+                visit(element)
+                callStack.pop()
+                function.appendLine("mtype result = pop();")
+                function.appendLine("exitFunction();")
+                function.appendLine("return result;")
+                function.appendLine("}")
+                functions.add(function.toString())
+                code.appendLine("$varName.push_back($funName());")
+            } else {
+                visit(element)
+                code.appendLine("$varName.push_back(pop());")
+            }
+        }
+        code.appendLine("push(mt::mlist($varName));")
     }
 
     override fun visitLambda(node: LambdaNode) {
@@ -176,7 +201,10 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
     }
 
     override fun wrapStack() {
-        TODO("Not yet implemented")
+        code.appendLine("MyxalStack &stack = getStack();")
+        code.appendLine("list l = mt::mlist(stack.stack);")
+        code.appendLine("stack.stack.clear();")
+        code.appendLine("stack.push(l);")
     }
 
     override fun stackSize() {

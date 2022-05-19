@@ -342,6 +342,18 @@ number mt::mnumber(long long num) {
     return created;
 }
 
+number mt::mfalse() {
+    number created = std::make_shared<MyxalNumber>(0);
+    registerForGC(created);
+    return created;
+}
+
+number mt::mtrue() {
+    number created = std::make_shared<MyxalNumber>(1);
+    registerForGC(created);
+    return created;
+}
+
 string mt::mstring(std::string str) {
     string created = std::make_shared<MyxalString>(str);
     registerForGC(created);
