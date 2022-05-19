@@ -5,12 +5,14 @@
 #include <vector>
 #include <cstddef>
 #include <functional>
-#include "gc.hpp"
+#include <memory>
 
+class MyxalType;
 class MyxalNumber;
 class MyxalList;
 class MyxalString;
 
+typedef std::shared_ptr<MyxalType> mtype;
 typedef std::shared_ptr<MyxalNumber> number;
 typedef std::shared_ptr<MyxalList> list;
 typedef std::shared_ptr<MyxalString> string;

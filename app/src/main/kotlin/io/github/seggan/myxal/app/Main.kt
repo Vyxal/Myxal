@@ -197,6 +197,7 @@ object Main {
                     throw RuntimeException("Failed to compile native code. See g++ output for details.")
                 }
 
+                println("Cleaning up...")
                 Files.move(final, buildDir.parent.resolve(executableName), StandardCopyOption.REPLACE_EXISTING)
             } finally {
                 if (!cmd.hasOption('d')) {

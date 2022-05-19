@@ -18,10 +18,8 @@ import io.github.seggan.myxal.runtime.escapeString
 import io.github.seggan.myxal.runtime.times
 import org.apache.commons.cli.CommandLine
 
-const val TEMPLATE = """
-#include <iostream>
+const val TEMPLATE = """#include <iostream>
 #include <string>
-#include <algorithm>
 #include "prog.hpp"
 #include "types.hpp"
 #include "helpers.hpp"
@@ -29,7 +27,7 @@ const val TEMPLATE = """
 
 %s
 
-int main(int argc, char **argv) {
+int main(int argc, char *argv[]) {
 enterFunction();
 try {
 %s
@@ -65,9 +63,11 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
         if (element == Element.PRINT || element == Element.PRINTLN) {
             code.append("std::cout << pop()->asString()")
             if (element == Element.PRINTLN) {
-                code.append(" << \"\\n\"")
+                code.appendLine(" << std::endl;")
+            } else {
+                code.appendLine(";")
+                code.appendLine("std::cout.flush();")
             }
-            code.appendLine(';')
         } else {
             val list = listOf("pop()") * element.arity
             code.append("push(")
@@ -105,7 +105,7 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
         } else {
             code.appendLine("while (true) {")
             visit(node.body)
-            code.appendLine("context() = context()->asNumber()->add(1);")
+            code.appendLine("context() = asNumber(context())->add(1);")
             code.appendLine("}")
         }
         code.appendLine("exitScope();")
@@ -202,7 +202,7 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
 
     override fun wrapStack() {
         code.appendLine("MyxalStack &stack = getStack();")
-        code.appendLine("list l = mt::mlist(stack.stack);")
+        code.appendLine("list l = stack.wrap();")
         code.appendLine("stack.stack.clear();")
         code.appendLine("stack.push(l);")
     }

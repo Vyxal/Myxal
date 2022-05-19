@@ -2,7 +2,8 @@
 #define JYXAL_STACK_HPP_INCLUDE
 
 #include <vector>
-#include "gc.hpp"
+#include <string>
+#include "types.hpp"
 
 class MyxalStack {
     public:
@@ -15,6 +16,10 @@ class MyxalStack {
         mtype pop();
 
         size_t size();
+
+        std::string asString();
+
+        list wrap();
         
         std::vector<mtype> stack;
 };

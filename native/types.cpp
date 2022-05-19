@@ -128,7 +128,7 @@ MyxalList::MyxalList(MyxalList &other) : MyxalList(other.size()) {
 }
 
 MyxalList::MyxalList(std::vector<mtype> values) {
-    this->backing = backing;
+    this->backing = values;
     this->generator = [] { return nullptr; };
     this->isDone = true;
 }
@@ -192,7 +192,6 @@ std::string MyxalList::asString() {
 
 list MyxalList::operator+(MyxalList &other) {
     list result = std::make_shared<MyxalList>(this->backing.size() + other.backing.size());
-    registerForGC(result);
     for (auto &item : this->backing) {
         result->backing.push_back(item);
     }
@@ -204,7 +203,6 @@ list MyxalList::operator+(MyxalList &other) {
 
 list MyxalList::operator+(mtype other) {
     list result = std::make_shared<MyxalList>(this->backing.size() + 1);
-    registerForGC(result);
     for (auto &item : this->backing) {
         result->backing.push_back(item);
     }
@@ -319,55 +317,37 @@ string asString(mtype item) {
 }
 
 number mt::mnumber(int num) {
-    number created = std::make_shared<MyxalNumber>(num);
-    registerForGC(created);
-    return created;
+    return std::make_shared<MyxalNumber>(num);
 }
 
 number mt::mnumber(double num) {
-    number created = std::make_shared<MyxalNumber>(num);
-    registerForGC(created);
-    return created;
+    return std::make_shared<MyxalNumber>(num);
 }
 
 number mt::mnumber(long double num) {
-    number created = std::make_shared<MyxalNumber>(num);
-    registerForGC(created);
-    return created;
+    return std::make_shared<MyxalNumber>(num);
 }
 
 number mt::mnumber(long long num) {
-    number created = std::make_shared<MyxalNumber>(num);
-    registerForGC(created);
-    return created;
+    return std::make_shared<MyxalNumber>(num);
 }
 
 number mt::mfalse() {
-    number created = std::make_shared<MyxalNumber>(0);
-    registerForGC(created);
-    return created;
+    return std::make_shared<MyxalNumber>(0);
 }
 
 number mt::mtrue() {
-    number created = std::make_shared<MyxalNumber>(1);
-    registerForGC(created);
-    return created;
+    return std::make_shared<MyxalNumber>(1);
 }
 
 string mt::mstring(std::string str) {
-    string created = std::make_shared<MyxalString>(str);
-    registerForGC(created);
-    return created;
+    return std::make_shared<MyxalString>(str);
 }
 
 list mt::mlist(std::vector<mtype> values) {
-    list created = std::make_shared<MyxalList>(values);
-    registerForGC(created);
-    return created;
+    return std::make_shared<MyxalList>(values);
 }
 
 list mt::mlist(std::function<mtype()> gen) {
-    list created = std::make_shared<MyxalList>(gen);
-    registerForGC(created);
-    return created;
+    return std::make_shared<MyxalList>(gen);
 }

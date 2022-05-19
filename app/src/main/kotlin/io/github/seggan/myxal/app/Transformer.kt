@@ -25,6 +25,7 @@ import io.github.seggan.myxal.compiler.tree.StringNode
 import io.github.seggan.myxal.compiler.tree.VariableGetNode
 import io.github.seggan.myxal.compiler.tree.VariableSetNode
 import io.github.seggan.myxal.compiler.tree.WhileNode
+import io.github.seggan.myxal.compiler.tree.WrapStackNode
 import io.github.seggan.myxal.runtime.text.Compression.decompress
 import io.github.seggan.myxal.runtime.unescapeString
 import org.antlr.v4.runtime.CharStreams
@@ -93,6 +94,7 @@ class Transformer private constructor() : MyxalParserBaseVisitor<List<Node>>() {
                 "£" -> RegisterSetNode()
                 "¥" -> RegisterLoadNode()
                 "?" -> InputNode()
+                "W" -> WrapStackNode()
                 else -> ElementNode(Element.getByText(element))
             }
         )

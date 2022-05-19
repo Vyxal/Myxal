@@ -24,3 +24,22 @@ mtype MyxalStack::pop() {
 size_t MyxalStack::size() {
     return stack.size();
 }
+
+std::string MyxalStack::asString() {
+    std::string ret = "";
+    std::vector<mtype>::iterator it = stack.begin();
+    while (it != stack.end()) {
+        ret += (*it)->asString();
+        ret += " ";
+        it++;
+    }
+    return ret;
+}
+
+list MyxalStack::wrap() {
+    std::vector<mtype> l;
+    for (auto it = stack.begin(); it != stack.end(); it++) {
+        l.push_back(*it);
+    }
+    return mt::mlist(l);
+}
