@@ -27,6 +27,8 @@ const val TEMPLATE = """#include <iostream>
 
 %s
 
+mtype mregister = mt::mnumber(0);
+
 int main(int argc, char *argv[]) {
 enterFunction();
 try {
@@ -50,13 +52,26 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
         get() = callStack.peek()
     private val functions = mutableListOf<String>()
 
+    private val blockRegex = "\\n(?=(while)|(for)|(lbl)|(goto))".toRegex()
+    private val pushPopRegex = "(?<=\\n)push\\((.+)\\);\\n(.+?)pop\\(\\)".toRegex()
+
     private var counter = 0
 
     override fun compile(ast: List<Node>): String {
         val main = StringBuilder()
         callStack.push(main)
         visit(ast)
-        return TEMPLATE.format(functions.joinToString("\n"), main)
+        val res = TEMPLATE.format(functions.joinToString("\n"), main)
+        val blocks = blockRegex.split(res).map {
+            var prev: String
+            var b = it
+            do {
+                prev = b
+                b = pushPopRegex.replace(b, "$2$1")
+            } while (b != prev)
+            b
+        }
+        return blocks.joinToString("\n")
     }
 
     override fun visitElement(element: Element) {
@@ -150,11 +165,11 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
     }
 
     override fun loadRegister() {
-        code.appendLine("push(mregister());")
+        code.appendLine("push(mregister);")
     }
 
     override fun setRegister() {
-        code.appendLine("mregister() = pop();")
+        code.appendLine("mregister = pop();")
     }
 
     override fun visitString(value: String) {

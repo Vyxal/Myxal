@@ -5,6 +5,14 @@
 #include "helpers.hpp"
 #include "elements.hpp"
 
+mtype add(mtype b, mtype a)  {
+    if (a->isNumber() && b->isNumber()) {
+        return asNumber(a)->add(*asNumber(b));
+    } else {
+        return mt::mstring(a->asString() + b->asString());
+    }
+}
+
 mtype decrement(mtype value) {
     if (value->isNumber()) {
         return asNumber(value)->sub(1);

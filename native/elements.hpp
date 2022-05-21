@@ -3,6 +3,8 @@
 
 #include "types.hpp"
 
+mtype add(mtype b, mtype a);
+
 mtype decrement(mtype value);
 
 mtype increment(mtype value);

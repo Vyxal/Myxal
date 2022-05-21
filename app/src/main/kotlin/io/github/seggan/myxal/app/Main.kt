@@ -180,10 +180,15 @@ object Main {
 
             val a = mutableListOf(
                 "g++",
-                "-o", executableName,
-                if (cmd.hasOption('d')) "-g" else "-O3",
-                *includes.toTypedArray()
+                "-o", executableName
             )
+            if (cmd.hasOption('d')) {
+                a.add("-g")
+            }
+            if (!cmd.hasOption('O')) {
+                a.add("-O3")
+            }
+            a.addAll(includes)
             ProcessBuilder(*a.toTypedArray())
                 .directory(buildDir.toFile())
                 .redirectOutput(ProcessBuilder.Redirect.INHERIT)
