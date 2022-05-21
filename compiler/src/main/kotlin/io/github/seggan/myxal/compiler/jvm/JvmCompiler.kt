@@ -459,6 +459,7 @@ class JvmCompiler(options: CommandLine) : ICompiler<ByteArray>(options) {
 
     override fun visitNum(value: NumNode) {
         AsmHelper.addBigComplex(value.value, mv)
+        AsmHelper.push(mv)
     }
 
     override fun visitComplex(value: ComplexNode) {
