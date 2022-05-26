@@ -15,6 +15,8 @@ import io.github.seggan.myxal.compiler.tree.ListNode
 import io.github.seggan.myxal.compiler.tree.Node
 import io.github.seggan.myxal.compiler.tree.NumNode
 import io.github.seggan.myxal.compiler.tree.WhileNode
+import io.github.seggan.myxal.compiler.util.CallStack
+import io.github.seggan.myxal.compiler.util.screamingSnakeCaseToCamelCase
 import org.apache.commons.cli.CommandLine
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
@@ -29,24 +31,7 @@ import java.util.ArrayDeque
 
 class JvmCompiler(options: CommandLine) : ICompiler<ByteArray>(options) {
 
-    private val callStack = object : ArrayDeque<MyxalMethod>() {
-        private var top: MyxalMethod? = null
-
-        override fun peek(): MyxalMethod {
-            return top!!
-        }
-
-        override fun push(e: MyxalMethod) {
-            top = e
-            super.push(e)
-        }
-
-        override fun pop(): MyxalMethod {
-            val e = super.pop()
-            top = super.peek()
-            return e
-        }
-    }
+    private val callStack = CallStack<MyxalMethod>()
     private val loopStack = object : ArrayDeque<Loop>() {
         override fun peek(): Loop {
             return super.peek() ?: throw IllegalStateException("Illegal use of break/continue outside of loop")
@@ -601,23 +586,5 @@ class JvmCompiler(options: CommandLine) : ICompiler<ByteArray>(options) {
             false
         )
         AsmHelper.push(mv)
-    }
-
-    private fun screamingSnakeCaseToCamelCase(s: String): String {
-        return buildString {
-            var upper = false
-            for (c in s) {
-                if (c == '_') {
-                    upper = true
-                } else {
-                    if (upper) {
-                        append(c.uppercaseChar())
-                        upper = false
-                    } else {
-                        append(c.lowercaseChar())
-                    }
-                }
-            }
-        }
     }
 }

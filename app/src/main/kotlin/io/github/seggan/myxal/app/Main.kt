@@ -2,6 +2,7 @@ package io.github.seggan.myxal.app
 
 import io.github.seggan.myxal.antlr.MyxalLexer
 import io.github.seggan.myxal.antlr.MyxalParser
+import io.github.seggan.myxal.compiler.cpp.NativeCompiler
 import io.github.seggan.myxal.compiler.jvm.JvmCompiler
 import io.github.seggan.myxal.runtime.text.Compression
 import org.antlr.v4.runtime.CharStreams
@@ -23,6 +24,8 @@ import java.io.PrintWriter
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
+import java.util.Locale
 import java.util.Scanner
 import java.util.jar.Attributes
 import java.util.jar.JarEntry
@@ -67,6 +70,7 @@ object Main {
             println(transformed)
         }
         println("Compiling program...")
+        val fileName = inputFile.substring(0, inputFile.lastIndexOf('.'))
         if (platform == SupportedPlatform.JVM) {
             val main = JvmCompiler(cmd).compile(transformed)
             val cr = ClassReader(main)
@@ -86,7 +90,6 @@ object Main {
                 }
             }
             println("Writing to jar...")
-            val fileName = inputFile.substring(0, inputFile.lastIndexOf('.'))
             val file = File("$fileName-temp.jar")
             val final = File("$fileName.jar")
             JarOutputStream(FileOutputStream(file)).use { jar ->
@@ -147,6 +150,75 @@ object Main {
                 }
             }
             file.delete()
+        } else if (platform == SupportedPlatform.NATIVE) {
+            val main = NativeCompiler(cmd).compile(transformed)
+
+            println("Compiling native code...")
+            val buildDir = Path.of(System.getProperty("user.dir"), "build-${System.currentTimeMillis()}")
+            val file = buildDir.resolve("main.cpp")
+            Files.createDirectories(buildDir)
+            Files.writeString(file, main)
+
+            val resourceList = mutableListOf<String>()
+            Scanner(Main::class.java.getResourceAsStream("/cpp-resources.txt")!!).use { scanner ->
+                while (scanner.hasNextLine()) {
+                    resourceList.add(scanner.nextLine())
+                }
+            }
+            val includes = mutableListOf<String>()
+            for (resource in resourceList) {
+                val inp = Main::class.java.getResourceAsStream("/$resource")
+                if (inp != null) {
+                    Files.copy(inp, buildDir.resolve(resource), StandardCopyOption.REPLACE_EXISTING)
+                }
+                includes.add(resource)
+            }
+            includes.add("main.cpp")
+
+            val isWindows = System.getProperty("os.name").lowercase(Locale.getDefault()).contains("win")
+            val executableName = if (isWindows) "$fileName.exe" else fileName
+
+            val a = mutableListOf(
+                "g++",
+                "-o", executableName
+            )
+            if (cmd.hasOption('d')) {
+                a.add("-g")
+            }
+            if (!cmd.hasOption('O')) {
+                a.add("-O3")
+            }
+            a.addAll(includes)
+            ProcessBuilder(*a.toTypedArray())
+                .directory(buildDir.toFile())
+                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                .redirectError(ProcessBuilder.Redirect.INHERIT)
+                .start()
+                .waitFor()
+
+            try {
+                val final = buildDir.resolve(executableName)
+                if (!Files.exists(final)) {
+                    throw RuntimeException("Failed to compile native code. See g++ output for details.")
+                }
+
+                println("Cleaning up...")
+                Files.move(final, buildDir.parent.resolve(executableName), StandardCopyOption.REPLACE_EXISTING)
+            } finally {
+                if (!cmd.hasOption('d')) {
+                    Files.walk(buildDir).filter { !Files.isDirectory(it) }.forEach {
+                        Files.delete(it)
+                    }
+
+                    Files.walk(buildDir).forEach {
+                        if (Files.isDirectory(it)) {
+                            Files.delete(it)
+                        } else {
+                            Files.deleteIfExists(it)
+                        }
+                    }
+                }
+            }
         }
         println("Done!")
     }

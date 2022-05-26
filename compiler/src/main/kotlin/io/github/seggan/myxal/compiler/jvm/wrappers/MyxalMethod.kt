@@ -2,6 +2,7 @@ package io.github.seggan.myxal.compiler.jvm.wrappers
 
 import io.github.seggan.myxal.compiler.jvm.optimise
 import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.Handle
 import org.objectweb.asm.Label
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.tree.InsnList
@@ -92,6 +93,14 @@ abstract class MyxalMethod internal constructor(cw: ClassWriter, access: Int, na
 
     override fun visitTypeInsn(opcode: Int, type: String) {
         super.visitTypeInsn(opcode, remap(type))
+    }
+
+    override fun visitLdcInsn(value: Any) {
+        if (value is Handle) {
+            super.visitLdcInsn(Handle(value.tag, remap(value.owner), value.name, value.desc, value.isInterface))
+        } else {
+            super.visitLdcInsn(value)
+        }
     }
 
     private fun remap(owner: String): String {

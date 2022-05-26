@@ -4,7 +4,9 @@ import io.github.seggan.myxal.compiler.Element
 import io.github.seggan.myxal.compiler.Element.*
 
 enum class SupportedPlatform(val platform: String, vararg overrides: Element) {
-    JVM("jvm", SORT, HEAD, TAIL, DOUBLE_REPEAT, INCREMENT);
+    JVM("jvm", SORT, HEAD, TAIL, DOUBLE_REPEAT),
+    NATIVE("native");
+
 
     val overrides: Set<String> = overrides.map { it.text }.toSet()
 
