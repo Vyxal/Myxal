@@ -62,14 +62,17 @@ class NativeCompiler(options: CommandLine) : ICompiler<String>(options) {
         callStack.push(main)
         visit(ast)
         val res = TEMPLATE.format(functions.joinToString("\n"), main)
-        val blocks = blockRegex.split(res).map {
-            var prev: String
-            var b = it
-            do {
-                prev = b
-                b = pushPopRegex.replace(b, "$2$1")
-            } while (b != prev)
-            b
+        var blocks = blockRegex.split(res)
+        if (!options.hasOption('O')) {
+            blocks = blocks.map {
+                var prev: String
+                var b = it
+                do {
+                    prev = b
+                    b = pushPopRegex.replace(b, "$2$1")
+                } while (b != prev)
+                b
+            }
         }
         return blocks.joinToString("\n")
     }

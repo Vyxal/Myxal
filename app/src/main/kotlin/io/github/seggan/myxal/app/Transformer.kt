@@ -179,7 +179,7 @@ class Transformer private constructor() : MyxalParserBaseVisitor<List<Node>>() {
     }
 
     override fun visitErrorNode(node: ErrorNode): List<Node> {
-        throw IllegalArgumentException("Error node: ${node.text}")
+        throw IllegalArgumentException("Error: ${node.text}")
     }
 
     override fun aggregateResult(aggregate: List<Node>, nextResult: List<Node>): List<Node> {
