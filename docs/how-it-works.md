@@ -6,8 +6,8 @@ Here I'll get the reveal all the intricacies of the Myxal compiler and what I le
 
 Obviously you cannot get very far in creating a programming language without parsing it. Unlike its parent
 language [Vyxal](https://github.com/Vyxal/Vyxal), Myxal does not use a custom lexer/parser. Using a custom parsing
-system allows for a lot of random parsing quirks, like the inability of Vyxal to parse the single byte backslash
-character. Instead, the grammar is written out in [ANTLR](https://www.antlr.org) form.
+system allows for a lot of random parsing quirks. Instead, the grammar is written out in [ANTLR](https://www.antlr.org)
+form.
 
 The [lexer](https://github.com/Vyxal/Myxal/blob/main/app/src/main/antlr/MyxalLexer.g4) may appear to be slightly more
 complicated than it should be (and it probably is, even with two rewrites), but it is relatively simple once you read
@@ -52,3 +52,113 @@ aliases. During transformation, the aliased elements are replaced by their equiv
 not `kS`, it is `"ඞ"`. Some elements are also implemented as others. For example, boolify can be `[1|0]`. However, the
 reason many more are not implemented is because of overloads. One overload implemented as a group of elements may do
 something completely different on a different data type.
+
+## JVM Compilation
+
+Now we get to the juicy stuff. This section will specifically be about JVM compilation. The next section will be about
+native.
+
+### Structures
+
+The basic structures of Myxal are implemented in the way you expect. `if` statements are implemented as a `truthValue` (
+boolify) call followed by an `IFEQ` jump to the end of the statement (`runtime/` corresponds
+to `io/github/seggan/myxal/runtime/`):
+
+```
+INVOKEVIRTUAL runtime/ProgramStack.pop()Ljava/lang/Object;
+INVOKESTATIC runtime/RuntimeHelpers.truthValue(Ljava/lang/Object;)Z
+IFEQ end
+... // Do stuff
+end:
+... // Post-if
+```
+
+If the `if` has an `else` clause, you get:
+
+```
+INVOKEVIRTUAL runtime/ProgramStack.pop()Ljava/lang/Object;
+INVOKESTATIC runtime/RuntimeHelpers.truthValue(Ljava/lang/Object;)Z
+IFEQ else
+... // If clause
+GOTO end
+else:
+... // Else clause
+end:
+... // Post-if
+```
+
+Standard while loops are implemented as such:
+
+```
+start:
+... // Condition
+INVOKEVIRTUAL runtime/ProgramStack.pop()Ljava/lang/Object;
+INVOKESTATIC runtime/RuntimeHelpers.truthValue(Ljava/lang/Object;)Z
+IFEQ end
+... // While body
+GOTO start
+end:
+... // Post-while
+```
+
+While infinite loops use a single `GOTO`:
+
+```
+start:
+... // While body
+GOTO start
+```
+
+Good ol' `for` loops use iterators, just like Java's for-each loops:
+
+```
+INVOKEVIRTUAL runtime/ProgramStack.pop()Ljava/lang/Object;
+INVOKESTATIC runtime/RuntimeHelpers.forify(Ljava/lang/Object;)Ljava/util/Iterator;
+ASTORE iterator
+start:
+ALOAD iterator
+INVOKEINTERFACE java/util/Iterator.hasNext()Z
+IFEQ end
+ALOAD iterator
+INVOKEINTERFACE java/util/Iterator.next()Ljava/lang/Object;
+ALOAD stack
+SWAP
+INVOKEVIRTUAL runtime/ProgramStack.push(Ljava/lang/Object;)V
+... // For body
+GOTO start
+end:
+... // Post-for
+```
+
+To improve performance, counting `for` loops use a countdown:
+
+```
+ISTORE count
+start:
+IINC count -1
+ILOAD count
+IFEQ end
+... // For body
+GOTO start
+end:
+... // Post-for
+```
+
+### Lambdas
+
+A lambda is simply a function called `lambda$counter`. To have an instance of this function on the stack, Myxal first
+pushes a `MethodHandle` on the JVM stack (thanks for letting us do that, Oracle :heart: ), then wraps it with the arity
+into a `Lambda` object. That is then pushed onto the stack.
+
+### Register and Variables
+
+The register and variables are implemented as `private static Object`s in the main class. Coincidentally, this also
+means that you can get the register's value by simply accessing the variable named `register`.
+
+### Elements
+
+And who can forget about the elements? Elements each have a unique name based on
+their [enum constant name](https://github.com/Vyxal/Myxal/blob/main/compiler/src/main/kotlin/io/github/seggan/myxal/compiler/Element.kt)
+, converted to camel case. Monads take a single object as a parameter and return the result. This allows effective
+inlining. Dyads take the stack and return an object. Anything else (or elements that return more than one value) take
+the stack and return nothing.
