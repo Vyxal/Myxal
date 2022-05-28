@@ -67,15 +67,18 @@ class Transformer private constructor() : MyxalParserBaseVisitor<List<Node>>() {
     }
 
     override fun visitModifier(ctx: ModifierContext): List<Node> {
-        val result: List<Node> = visit(ctx.program_node())
-        return when (ctx.MODIFIER().text) {
-            "ß" -> listOf(IfNode(result, null))
-            "&" -> listOf(RegisterLoadNode(), *result.toTypedArray(), RegisterSetNode())
-            "v" -> listOf(LambdaNode(1, result), ElementNode(Element.MAP))
-            "~" -> listOf(LambdaNode(1, result), ElementNode(Element.FILTER))
-            "¨=" -> listOf(ElementNode(Element.DUPLICATE), *result.toTypedArray(), ElementNode(Element.EQUAL))
-            else -> result
+        var final = visit(ctx.mod_node())
+        for (mod in ctx.MODIFIER().map { it.text }.reversed()) {
+            final = when (mod) {
+                "ß" -> listOf(IfNode(final, null))
+                "&" -> listOf(RegisterLoadNode(), *final.toTypedArray(), RegisterSetNode())
+                "v" -> listOf(LambdaNode(1, final), ElementNode(Element.MAP))
+                "~" -> listOf(LambdaNode(1, final), ElementNode(Element.FILTER))
+                "¨=" -> listOf(ElementNode(Element.DUPLICATE), *final.toTypedArray(), ElementNode(Element.EQUAL))
+                else -> final
+            }
         }
+        return final
     }
 
     override fun visitElement(ctx: ElementContext): List<Node> {
@@ -83,7 +86,7 @@ class Transformer private constructor() : MyxalParserBaseVisitor<List<Node>>() {
         if (ctx.PREFIX() != null) {
             element = ctx.PREFIX().text + element
         }
-        if (aliases.containsKey(element) && !ctx.isInAlias) {
+        if (aliases.containsKey(element)) {
             return visit(aliases[element]!!)
         }
         return listOf(

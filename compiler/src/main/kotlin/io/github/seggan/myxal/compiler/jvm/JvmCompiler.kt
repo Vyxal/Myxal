@@ -2,6 +2,8 @@ package io.github.seggan.myxal.compiler.jvm
 
 import io.github.seggan.myxal.compiler.Element
 import io.github.seggan.myxal.compiler.ICompiler
+import io.github.seggan.myxal.compiler.MyxalCompileException
+import io.github.seggan.myxal.compiler.jvm.msplit.SplitMethod
 import io.github.seggan.myxal.compiler.jvm.wrappers.Loop
 import io.github.seggan.myxal.compiler.jvm.wrappers.MyxalClassWriter
 import io.github.seggan.myxal.compiler.jvm.wrappers.MyxalMethod
@@ -19,9 +21,11 @@ import io.github.seggan.myxal.compiler.util.CallStack
 import io.github.seggan.myxal.compiler.util.screamingSnakeCaseToCamelCase
 import org.apache.commons.cli.CommandLine
 import org.objectweb.asm.ClassReader
+import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Handle
 import org.objectweb.asm.Label
+import org.objectweb.asm.MethodTooLargeException
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.util.CheckClassAdapter
@@ -79,6 +83,7 @@ class JvmCompiler(options: CommandLine) : ICompiler<ByteArray>(options) {
             "main",
             "([Ljava/lang/String;)V"
         )
+        main.optimise = !options.hasOption('O')
         callStack.push(main)
         main.visitCode()
         visit(ast)
@@ -118,7 +123,11 @@ class JvmCompiler(options: CommandLine) : ICompiler<ByteArray>(options) {
             }
             throw e
         }
-        return writer.toByteArray()
+        try {
+            return writer.toByteArray()
+        } catch (e: MethodTooLargeException) {
+            throw MyxalCompileException("Method too large, size ${e.codeSize}", e)
+        }
     }
 
     override fun visitElement(element: Element) {
@@ -488,6 +497,7 @@ class JvmCompiler(options: CommandLine) : ICompiler<ByteArray>(options) {
                     methodName,
                     "()Ljava/lang/Object;"
                 )
+                method.optimise = !options.hasOption('O')
                 method.visitCode()
                 callStack.push(method)
                 visit(node)
@@ -520,12 +530,13 @@ class JvmCompiler(options: CommandLine) : ICompiler<ByteArray>(options) {
     }
 
     override fun visitLambda(node: LambdaNode) {
-        val methodName = "lambda$$${counter++}"
+        val methodName = "lambda$${counter++}"
         val method = writer.visitMethod(
             ACC_PRIVATE or ACC_STATIC,
             methodName,
-            "(Lruntime/ProgramStack;)Ljava/lang/Object;"
+            "(Lio/github/seggan/myxal/runtime/ProgramStack;)Ljava/lang/Object;"
         )
+        method.optimise = !options.hasOption('O')
         method.visitCode()
         callStack.push(method)
         visit(node.body)

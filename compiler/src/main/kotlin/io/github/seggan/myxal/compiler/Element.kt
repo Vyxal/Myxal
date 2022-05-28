@@ -124,7 +124,7 @@ enum class Element(val text: String, val arity: Int, val vectorise: Boolean, val
                     return e
                 }
             }
-            throw JyxalCompileException("Unknown element: $text")
+            throw MyxalCompileException("Unknown element: $text")
         }
     }
 }

@@ -149,7 +149,9 @@ object Main {
                     }
                 }
             }
-            file.delete()
+            if (!cmd.hasOption('d')) {
+                file.delete()
+            }
         } else if (platform == SupportedPlatform.NATIVE) {
             val main = NativeCompiler(cmd).compile(transformed)
 

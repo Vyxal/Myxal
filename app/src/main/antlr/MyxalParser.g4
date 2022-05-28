@@ -13,7 +13,7 @@ file
     ;
 
 alias
-    : program ALIAS theAlias=element WHITESPACE*
+    : program ALIAS WHITESPACE* theAlias=element
     ;
 
 program
@@ -112,7 +112,11 @@ variable
     ;
 
 modifier
-    : MODIFIER program_node
+    : MODIFIER+ mod_node
+    ;
+
+mod_node
+    : (element | statement | literal)
     ;
 
 element locals [boolean isInAlias]

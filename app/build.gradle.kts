@@ -22,7 +22,7 @@ dependencies {
     antlr("org.antlr:antlr4:4.10.1")
 }
 
-val dest = JPath.of("$buildDir/runtimeClasses")
+val dest: JPath = JPath.of("$buildDir/runtimeClasses")
 
 version = "0.7.0"
 

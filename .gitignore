@@ -24,4 +24,6 @@ build/
 test*.*
 
 gen/
+bin/
+.antlr/
 build-*/
