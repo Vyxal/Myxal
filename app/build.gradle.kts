@@ -24,7 +24,7 @@ dependencies {
 
 val dest: JPath = JPath.of("$buildDir/runtimeClasses")
 
-version = "0.7.0"
+version = "0.7.1"
 
 application {
     // Define the main class for the application.
