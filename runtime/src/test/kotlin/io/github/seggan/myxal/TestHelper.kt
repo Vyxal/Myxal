@@ -1,6 +1,6 @@
 package io.github.seggan.myxal
 
-import io.github.seggan.myxal.Main.doMain
+// import io.github.seggan.myxal.Main.doMain
 import java.io.IOException
 import java.net.URLClassLoader
 import java.nio.file.Files
@@ -13,7 +13,7 @@ object TestHelper {
     @Throws(IOException::class)
     fun run(vararg args: String) {
         val fileName = Path.of(args[0]).fileName.toString()
-        doMain(arrayOf(*args), true)
+        // doMain(arrayOf(*args), true)
         val jar = Path.of(args[0]).resolveSibling(p.matcher(fileName).replaceAll(".jar"))
         val cl = URLClassLoader(
             arrayOf(jar.toUri().toURL()),

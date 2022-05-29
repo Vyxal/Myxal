@@ -1,7 +1,7 @@
 package io.github.seggan.myxal.runtime
 
-import io.github.seggan.myxal.TestHelper
 import io.github.seggan.myxal.runtime.list.JyxalList
+import io.github.seggan.myxal.runtime.math.BigComplex
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -10,8 +10,18 @@ class ListTests {
     @Test
     fun testDotProduct() {
         Assertions.assertEquals(
-            dotProduct(JyxalList.create(0, 1, "foo"), JyxalList.create(2, 4, 2)),
-            "04foofoo"
+                "-8foofoo",
+                dotProduct(
+                        ProgramStack(
+                                listOf(
+                                        JyxalList.create(BigComplex.valueOf(-2), "foo"),
+                                        JyxalList.create(
+                                                BigComplex.valueOf(4),
+                                                BigComplex.valueOf(2)
+                                        )
+                                )
+                        )
+                )
         )
     }
 }

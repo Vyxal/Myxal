@@ -256,7 +256,9 @@ fun divFive(obj: Any): Any = divisibleBy(obj, 5)
 
 fun divThree(obj: Any): Any = divisibleBy(obj, 3)
 
-fun dotProduct(lhs: Any, rhs: Any): Any {
+fun dotProduct(stack: ProgramStack): Any {
+    val rhs = stack.pop()
+    val lhs = stack.pop()
     return listify(lhs).zip(listify(rhs), ::multImpl).reduce(::addImpl)
 }
 
