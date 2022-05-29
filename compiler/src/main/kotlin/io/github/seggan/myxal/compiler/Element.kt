@@ -70,6 +70,7 @@ enum class Element(val text: String, val arity: Int, val vectorise: Boolean, val
     CONTAINS("c", 2, false),
     COUNT("O", 2, false),
     CUMULATIVE_GROUPS("l", 2, false),
+    DOT_PRODUCT("Þ•", 2, false),
     FILTER("F", 2, false),
     FLATTEN("f", 1, false),
     HEAD("h", 1, false),

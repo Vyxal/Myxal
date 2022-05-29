@@ -256,6 +256,10 @@ fun divFive(obj: Any): Any = divisibleBy(obj, 5)
 
 fun divThree(obj: Any): Any = divisibleBy(obj, 3)
 
+fun dotProduct(lhs: Any, rhs: Any): Any {
+    return listify(lhs).zip(listify(rhs), ::multImpl).reduce(::addImpl)
+}
+
 fun doubleRepeat(obj: Any): Any {
     return when (obj) {
         is JyxalList -> {
@@ -1001,15 +1005,19 @@ fun multiply(stack: ProgramStack): Any {
     if (o != null) return o
     val b = stack.pop()
     val a = stack.pop()
-    return if (a is BigComplex) {
+    return multImpl(a, b)
+}
+
+private fun multImpl(a: Any, b: Any): Any {
+    if (a is BigComplex) {
         if (b is BigComplex) {
             return a * b
         } else if (b is Lambda) {
             return Lambda(a.toInt(), b.handle)
         }
-        b.toString() * a.toInt()
+        return b.toString() * a.toInt()
     } else if (a is Lambda && b is BigComplex) {
-        Lambda(b.toInt(), a.handle)
+        return Lambda(b.toInt(), a.handle)
     } else {
         val aString = a.toString()
         if (b is BigComplex) {
@@ -1025,7 +1033,7 @@ fun multiply(stack: ProgramStack): Any {
                 sb.append(c)
             }
         }
-        sb.toString()
+        return sb.toString()
     }
 }
 
