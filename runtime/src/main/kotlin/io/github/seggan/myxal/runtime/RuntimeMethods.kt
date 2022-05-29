@@ -31,9 +31,7 @@ private val LONG_MIN_VALUE_AS_BIG: BigInteger by lazy(LazyThreadSafetyMode.NONE)
 
 private val regexCache = mutableMapOf<String, Regex>()
 
-fun add(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+fun add(a: Any, b: Any): Any {
     return addImpl(a, b)
 }
 
@@ -1479,6 +1477,34 @@ fun monadVectorise(obj: Any, handle: MethodHandle): Any {
         return result.jyxal()
     }
     return handle.invoke(obj)
+}
+
+fun dyadVectorise(left: Any, right: Any, handle: MethodHandle): Any {
+    if (left is JyxalList) {
+        if (right is JyxalList) {
+            val result = ArrayList<Any>()
+            val itLeft = left.iterator()
+            val itRight = right.iterator()
+            while (itLeft.hasNext() && itRight.hasNext()) {
+                result.add(dyadVectorise(itLeft.next(), itRight.next(), handle))
+            }
+            return result.jyxal()
+        } else {
+            val result = ArrayList<Any>()
+            for (item in left) {
+                result.add(dyadVectorise(item, right, handle))
+            }
+            return result.jyxal()
+        }
+    } else if (right is JyxalList) {
+        val result = ArrayList<Any>()
+        for (item in right) {
+            result.add(dyadVectorise(left, item, handle))
+        }
+        return result.jyxal()
+    } else {
+        return handle.invoke(left, right)
+    }
 }
 
 operator fun BigComplex.plus(other: BigComplex): BigComplex = this.add(other)

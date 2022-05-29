@@ -3,7 +3,7 @@ package io.github.seggan.myxal.compiler.jvm
 import io.github.seggan.myxal.compiler.Element
 import io.github.seggan.myxal.compiler.ICompiler
 import io.github.seggan.myxal.compiler.MyxalCompileException
-import io.github.seggan.myxal.compiler.jvm.msplit.SplitMethod
+// import io.github.seggan.myxal.compiler.jvm.msplit.SplitMethod
 import io.github.seggan.myxal.compiler.jvm.wrappers.Loop
 import io.github.seggan.myxal.compiler.jvm.wrappers.MyxalClassWriter
 import io.github.seggan.myxal.compiler.jvm.wrappers.MyxalMethod
@@ -194,6 +194,37 @@ class JvmCompiler(options: CommandLine) : ICompiler<ByteArray>(options) {
                             "runtime/RuntimeMethods",
                             name,
                             "(Ljava/lang/Object;)Ljava/lang/Object;",
+                            false
+                        )
+                    }
+                    AsmHelper.push(mv)
+                }
+                2 -> {
+                    AsmHelper.pop(mv)
+                    AsmHelper.pop(mv)
+                    if (element.vectorise) {
+                        mv.visitLdcInsn(
+                            Handle(
+                                H_INVOKESTATIC,
+                                "runtime/RuntimeMethods",
+                                name,
+                                "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+                                false
+                            )
+                        )
+                        mv.visitMethodInsn(
+                            INVOKESTATIC,
+                            "runtime/RuntimeMethods",
+                            "dyadVectorise",
+                            "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/invoke/MethodHandle;)Ljava/lang/Object;",
+                            false
+                        )
+                    } else {
+                        mv.visitMethodInsn(
+                            INVOKESTATIC,
+                            "runtime/RuntimeMethods",
+                            name,
+                            "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
                             false
                         )
                     }

@@ -41,18 +41,24 @@ object Main {
 
         val options = Options()
         options.addOption("h", "help", false, "Print this help message")
-        options.addOption("c", "codepage", false, "Use the Myxal codepage")
-        options.addOption("d", "debug", false, "Print debug stuff")
-        options.addOption("p", "platform", true, "Platform to compile for")
-        options.addOption(Option.builder("f").longOpt("file").hasArg()
-            .desc("Input file").required().build())
-        options.addOption("O", "nooptimize", false, "Do not optimize")
+            .addOption("c", "codepage", false, "Use the Myxal codepage")
+            .addOption("d", "debug", false, "Print debug stuff")
+            .addOption("p", "platform", true, "Platform to compile for")
+            .addOption("f", "file", true, "Input file")
+            .addOption("C", "code", true, "Input code")
+            .addOption("O", "nooptimize", false, "Do not optimize")
 
         val cmd = cmdParser.parse(options, args)
 
         println("Parsing program...")
-        val inputFile = cmd.getOptionValue("f")
-        val bytes: ByteArray = Files.readAllBytes(Path.of(inputFile))
+        val inputFile = if (cmd.hasOption("f")) cmd.getOptionValue("f") else "Input"
+        val bytes = if (cmd.hasOption("f")) {
+            Files.readAllBytes(Path.of(cmd.getOptionValue("f")))
+        } else if (cmd.hasOption("C")) {
+            cmd.getOptionValue("C").toByteArray()
+        } else {
+            throw RuntimeException("Either file or code must be given as arguments")
+        }
         val s: String = if (cmd.hasOption("c")) {
             val sb = StringBuilder()
             for (b in bytes) {
@@ -70,7 +76,8 @@ object Main {
             println(transformed)
         }
         println("Compiling program...")
-        val fileName = inputFile.substring(0, inputFile.lastIndexOf('.'))
+        val extIndex = inputFile.lastIndexOf('.')
+        val fileName = if (extIndex == -1) inputFile else inputFile.substring(0, extIndex)
         if (platform == SupportedPlatform.JVM) {
             val main = JvmCompiler(cmd).compile(transformed)
             val cr = ClassReader(main)
