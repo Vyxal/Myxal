@@ -3,6 +3,7 @@ package io.github.seggan.myxal.runtime.text
 import io.github.seggan.myxal.runtime.fromBaseDigitsAlphabet
 import io.github.seggan.myxal.runtime.times
 import io.github.seggan.myxal.runtime.toBaseDigitsAlphabet
+import java.io.FileInputStream
 import java.util.ArrayDeque
 import java.util.Deque
 import kotlin.math.max
@@ -12,22 +13,30 @@ import kotlin.math.max
  */
 object Compression {
 
+    internal var isTest = false
+
     const val CODEPAGE =
         "λƛ¬∧⟑∨⟇÷×«\n»°•ß†€½∆ø↔¢⌐æʀʁɾɽÞƈ∞¨ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]`^_abcdefghijklmnopqrstuvwxyz{|}~↑↓∴∵›‹∷¤ð→←βτȧḃċḋėḟġḣḭŀṁṅȯṗṙṡṫẇẋẏż√⟨⟩‛₀₁₂₃₄₅₆₇₈¶⁋§ε¡∑¦≈µȦḂĊḊĖḞĠḢİĿṀṄȮṖṘṠṪẆẊẎŻ₌₍⁰¹²∇⌈⌊¯±₴…□↳↲⋏⋎꘍ꜝ℅≤≥≠⁼ƒɖ∪∩⊍£¥⇧⇩ǍǎǏǐǑǒǓǔ⁽‡≬⁺↵⅛¼¾Π„‟"
     private const val COMPRESSION_CODEPAGE =
         "λƛ¬∧⟑∨⟇÷×«»°•ß†€½∆ø↔¢⌐æʀʁɾɽÞƈ∞¨↑↓∴∵›‹∷¤ð→←βτȧḃċḋėḟġḣḭŀṁṅȯṗṙṡṫẇẋẏż√⟨⟩‛₀₁₂₃₄₅₆₇₈¶⁋§ε¡∑¦≈µȦḂĊḊĖḞĠḢİĿṀṄȮṖṘṠṪẆẊẎŻ₌₍⁰¹²∇⌈⌊¯±₴…□↳↲⋏⋎꘍ꜝ℅≤≥≠⁼ƒɖ∪∩⊍£¥⇧⇩ǍǎǏǐǑǒǓǔ⁽‡≬⁺↵⅛¼¾Π„‟"
 
     private val longDict: Array<String> by lazy {
-        val s: String
-        Compression::class.java.classLoader.getResourceAsStream("dictLong.txt")
-            .use { `in` -> s = String(`in`!!.readAllBytes()) }
-        s.replace("\r", "").split("\n").toTypedArray()
+        val instream = if (isTest) {
+            FileInputStream("../app/src/main/resources/dictLong.txt")
+        } else {
+            javaClass.getResourceAsStream("dictLong.txt")
+        }
+        instream.bufferedReader().use { it.readText() }.replace("\r", "")
+            .split("\n").toTypedArray()
     }
     private val shortDict: Array<String> by lazy {
-        val s: String
-        Compression::class.java.classLoader.getResourceAsStream("dictShort.txt")
-            .use { `in` -> s = String(`in`!!.readAllBytes()) }
-        s.replace("\r", "").split("\n").toTypedArray()
+        val instream = if (isTest) {
+            FileInputStream("../app/src/main/resources/dictShort.txt")
+        } else {
+            javaClass.getResourceAsStream("dictShort.txt")
+        }
+        instream.bufferedReader().use { it.readText() }.replace("\r", "")
+            .split("\n").toTypedArray()
     }
     private val maxWordLen by lazy {
         longDict.maxByOrNull { it.length }!!.length
