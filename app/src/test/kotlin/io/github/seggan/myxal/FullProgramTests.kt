@@ -9,8 +9,7 @@ import org.junit.jupiter.api.Test
 class FullProgramTests {
 
     @Test
-    fun testAddition() {
+    fun testVectAddition() {
         TestHelper.run("-O", "--code", "1 5 r 2 6 r +")
-        Assertions.assertTrue(false)
     }
 }
