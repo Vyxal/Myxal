@@ -173,12 +173,9 @@ object Main {
                     arrayOf(URL("jar:${final.toURI().toURL()}!/")),
                     Main::class.java.classLoader
                 )
-                try {
-                    val clazz = cl.loadClass("myxal.Main")
-                    clazz.getMethod("main", Array<String>::class.java).invoke(null, arrayOfNulls<String>(0) as Any)
-                } catch (e: ReflectiveOperationException) {
-                    throw RuntimeException(e)
-                }
+                cl.loadClass("myxal.Main")
+                    .getMethod("main", Array<String>::class.java)
+                    .invoke(null, arrayOfNulls<String>(0) as Any)
                 cl.close()
             }
         } else if (platform == SupportedPlatform.NATIVE) {
