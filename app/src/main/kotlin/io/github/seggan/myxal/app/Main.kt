@@ -21,6 +21,8 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.PrintWriter
+import java.net.URL
+import java.net.URLClassLoader
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
@@ -31,9 +33,12 @@ import java.util.jar.Attributes
 import java.util.jar.JarEntry
 import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
+import java.util.regex.Pattern
 
 object Main {
-    private const val runtimeClasses = "/build/runtime-classes"
+    private const val runtimeClasses = "../runtime/build/runtimeLibs"
+
+    private val p = Pattern.compile("\\..*$")
 
     @JvmStatic
     fun doMain(args: Array<String>, isTest: Boolean) {
@@ -47,6 +52,7 @@ object Main {
             .addOption("f", "file", true, "Input file")
             .addOption("C", "code", true, "Input code")
             .addOption("O", "nooptimize", false, "Do not optimize")
+            .addOption("r", "run", false, "Run after compiling")
 
         val cmd = cmdParser.parse(options, args)
 
@@ -158,6 +164,22 @@ object Main {
             }
             if (!cmd.hasOption('d')) {
                 file.delete()
+            }
+
+            if (cmd.hasOption("r")) {
+                println("Running...")
+
+                val cl = URLClassLoader(
+                    arrayOf(URL("jar:${final.toURI().toURL()}!/")),
+                    Main::class.java.classLoader
+                )
+                try {
+                    val clazz = cl.loadClass("myxal.Main")
+                    clazz.getMethod("main", Array<String>::class.java).invoke(null, arrayOfNulls<String>(0) as Any)
+                } catch (e: ReflectiveOperationException) {
+                    throw RuntimeException(e)
+                }
+                cl.close()
             }
         } else if (platform == SupportedPlatform.NATIVE) {
             val main = NativeCompiler(cmd).compile(transformed)

@@ -1398,13 +1398,13 @@ fun monadVectorise(obj: Any, handle: MethodHandle): Any {
     return handle.invoke(obj)
 }
 
-fun dyadVectorise(right: Any, left: Any, handle: MethodHandle): Any {
+fun dyadVectorise(left: Any, right: Any, handle: MethodHandle): Any {
     if (left is JyxalList && right is JyxalList) {
-        return left.zip(right) { l, r -> dyadVectorise(r, l, handle) }
+        return left.zip(right) { l, r -> dyadVectorise(l, r, handle) }
     } else if (left is JyxalList) {
-        return left.map { dyadVectorise(right, it, handle) }
+        return left.map { dyadVectorise(it, right, handle) }
     } else if (right is JyxalList) {
-        return right.map { dyadVectorise(it, left, handle) }
+        return right.map { dyadVectorise(left, it, handle) }
     } else {
         return handle.invoke(left, right)
     }

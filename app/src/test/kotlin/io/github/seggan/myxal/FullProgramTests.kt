@@ -5,10 +5,12 @@ import io.github.seggan.myxal.TestHelper
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
-class MathTest {
+/** Tests that run full programs to check if they compile and run */
+class FullProgramTests {
 
     @Test
     fun testAddition() {
-        Assertions.assertEquals(BigComplex.valueOf(3), TestHelper.run("--code", "1 2 +"))
+        TestHelper.run("-O", "--code", "1 5 r 2 6 r +")
+        Assertions.assertTrue(false)
     }
 }
