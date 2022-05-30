@@ -4,9 +4,11 @@ import io.github.seggan.myxal.antlr.MyxalLexer
 import io.github.seggan.myxal.antlr.MyxalParser
 import io.github.seggan.myxal.compiler.cpp.NativeCompiler
 import io.github.seggan.myxal.compiler.jvm.JvmCompiler
+import io.github.seggan.myxal.compiler.tree.Node
 import io.github.seggan.myxal.runtime.text.Compression
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
+import org.apache.commons.cli.CommandLine
 import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.Options
@@ -85,99 +87,7 @@ object Main {
         val extIndex = inputFile.lastIndexOf('.')
         val fileName = if (extIndex == -1) inputFile else inputFile.substring(0, extIndex)
         if (platform == SupportedPlatform.JVM) {
-            val main = JvmCompiler(cmd).compile(transformed)
-            val cr = ClassReader(main)
-            FileOutputStream("debug.log").use { os ->
-                val tcv = TraceClassVisitor(PrintWriter(os))
-                cr.accept(tcv, 0)
-            }
-            println("Extracting runtime classes...")
-            val resourceList: MutableSet<String> = HashSet()
-            val buildDir: Path = Path.of(System.getProperty("user.dir"), runtimeClasses)
-            Scanner(
-                if (isTest) Files.newInputStream(buildDir.resolve("runtime.list")) else
-                    Main::class.java.getResourceAsStream("/runtime.list")!!
-            ).use { scanner ->
-                while (scanner.hasNextLine()) {
-                    resourceList.add(scanner.nextLine())
-                }
-            }
-            println("Writing to jar...")
-            val file = File("$fileName-temp.jar")
-            val final = File("$fileName.jar")
-            JarOutputStream(FileOutputStream(file)).use { jar ->
-                for (resource in resourceList) {
-                    val entry = JarEntry(resource)
-                    entry.time = System.currentTimeMillis()
-                    jar.putNextEntry(entry)
-                    if (isTest) Files.newInputStream(buildDir.resolve(resource)) else Main::class.java.getResourceAsStream(
-                        "/$resource"
-                    )
-                        .use { inp ->
-                            inp?.copyTo(jar) ?: println("Skipping resource: $resource")
-                        }
-                }
-                val manifest = Manifest()
-                manifest.mainAttributes[Attributes.Name.MANIFEST_VERSION] = "1.0"
-                manifest.mainAttributes[Attributes.Name.MAIN_CLASS] = "myxal.Main"
-                jar.putNextEntry(JarEntry("META-INF/MANIFEST.MF"))
-                manifest.write(jar)
-                val entry = JarEntry("myxal/Main.class")
-                entry.time = System.currentTimeMillis()
-                jar.putNextEntry(entry)
-                jar.write(main)
-            }
-            if (!cmd.hasOption('O')) {
-                println("Performing post-compilation optimisations...")
-                val config = Configuration()
-                ConfigurationParser(Main::class.java.getResource("/rules.pro")!!, System.getProperties())
-                    .parse(config)
-                config.obfuscate = false
-                config.optimizationPasses = 2
-                config.programJars = ClassPath()
-                config.programJars.add(ClassPathEntry(file, false))
-                config.programJars.add(ClassPathEntry(final, true))
-                config.libraryJars = ClassPath()
-                config.libraryJars.add(
-                    ClassPathEntry(
-                        File(
-                            "${System.getProperty("java.home")}/jmods/java.base.jmod"
-                        ), false
-                    )
-                )
-                config.libraryJars.add(
-                    ClassPathEntry(
-                        File(
-                            "${System.getProperty("java.home")}/jmods/jdk.jshell.jmod"
-                        ), false
-                    )
-                )
-                config.warn = mutableListOf("!java.lang.invoke.MethodHandle")
-                config.optimizations = mutableListOf("!class/unboxing/enum")
-                ProGuard(config).execute()
-            } else {
-                FileInputStream(file).use { fis ->
-                    FileOutputStream(final).use { fos ->
-                        fis.copyTo(fos)
-                    }
-                }
-            }
-            if (!cmd.hasOption('d')) {
-                file.delete()
-            }
-
-            if (cmd.hasOption("r")) {
-                println("Running...")
-
-                val cl = URLClassLoader(
-                    arrayOf(URL("jar:${final.toURI().toURL()}!/")),
-                    Main::class.java.classLoader
-                )
-                cl.loadClass("myxal.Main")
-                    .getMethod("main", Array<String>::class.java)
-                    .invoke(null, arrayOfNulls<String>(0) as Any)
-                cl.close()
-            }
+            doMainJvm(transformed, cmd, fileName, isTest)
         } else if (platform == SupportedPlatform.NATIVE) {
             val main = NativeCompiler(cmd).compile(transformed)
 
@@ -249,6 +159,108 @@ object Main {
             }
         }
         println("Done!")
+    }
+
+    @JvmStatic
+    fun doMainJvm(transformed: List<Node>, cmd: CommandLine, fileName: String, isTest: Boolean) {
+        println("Compiling for JVM")
+
+        val main = JvmCompiler(cmd).compile(transformed)
+
+        if (cmd.hasOption("r")) {
+            println("Running...")
+
+            val cl = object : ClassLoader() {
+                fun defineMyxalMain(): Class<*> {
+                    return defineClass("myxal.Main", main, 0, main.size)
+                }
+            }
+
+            val clazz = cl.defineMyxalMain()
+            clazz
+                .getMethod("main", Array<String>::class.java)
+                .invoke(null, arrayOfNulls<String>(0) as Any)
+        }
+
+        val cr = ClassReader(main)
+        FileOutputStream("debug.log").use { os ->
+            val tcv = TraceClassVisitor(PrintWriter(os))
+            cr.accept(tcv, 0)
+        }
+        println("Extracting runtime classes...")
+        val resourceList: MutableSet<String> = HashSet()
+        val buildDir: Path = Path.of(System.getProperty("user.dir"), runtimeClasses)
+        Scanner(
+            if (isTest) Files.newInputStream(buildDir.resolve("runtime.list")) else
+                Main::class.java.getResourceAsStream("/runtime.list")!!
+        ).use { scanner ->
+            while (scanner.hasNextLine()) {
+                resourceList.add(scanner.nextLine())
+            }
+        }
+        println("Writing to jar...")
+        val file = File("$fileName-temp.jar")
+        val final = File("$fileName.jar")
+        JarOutputStream(FileOutputStream(file)).use { jar ->
+            for (resource in resourceList) {
+                val entry = JarEntry(resource)
+                entry.time = System.currentTimeMillis()
+                jar.putNextEntry(entry)
+                if (isTest) Files.newInputStream(buildDir.resolve(resource)) else Main::class.java.getResourceAsStream(
+                    "/$resource"
+                )
+                    .use { inp ->
+                        inp?.copyTo(jar) ?: println("Skipping resource: $resource")
+                    }
+            }
+            val manifest = Manifest()
+            manifest.mainAttributes[Attributes.Name.MANIFEST_VERSION] = "1.0"
+            manifest.mainAttributes[Attributes.Name.MAIN_CLASS] = "myxal.Main"
+            jar.putNextEntry(JarEntry("META-INF/MANIFEST.MF"))
+            manifest.write(jar)
+            val entry = JarEntry("myxal/Main.class")
+            entry.time = System.currentTimeMillis()
+            jar.putNextEntry(entry)
+            jar.write(main)
+        }
+        if (!cmd.hasOption('O')) {
+            println("Performing post-compilation optimisations...")
+            val config = Configuration()
+            ConfigurationParser(Main::class.java.getResource("/rules.pro")!!, System.getProperties())
+                .parse(config)
+            config.obfuscate = false
+            config.optimizationPasses = 2
+            config.programJars = ClassPath()
+            config.programJars.add(ClassPathEntry(file, false))
+            config.programJars.add(ClassPathEntry(final, true))
+            config.libraryJars = ClassPath()
+            config.libraryJars.add(
+                ClassPathEntry(
+                    File(
+                        "${System.getProperty("java.home")}/jmods/java.base.jmod"
+                    ), false
+                )
+            )
+            config.libraryJars.add(
+                ClassPathEntry(
+                    File(
+                        "${System.getProperty("java.home")}/jmods/jdk.jshell.jmod"
+                    ), false
+                )
+            )
+            config.warn = mutableListOf("!java.lang.invoke.MethodHandle")
+            config.optimizations = mutableListOf("!class/unboxing/enum")
+            ProGuard(config).execute()
+        } else {
+            FileInputStream(file).use { fis ->
+                FileOutputStream(final).use { fos ->
+                    fis.copyTo(fos)
+                }
+            }
+        }
+        if (!cmd.hasOption('d')) {
+            file.delete()
+        }
     }
 
     @JvmStatic
