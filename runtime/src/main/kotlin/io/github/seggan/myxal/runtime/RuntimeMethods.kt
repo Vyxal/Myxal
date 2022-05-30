@@ -32,17 +32,13 @@ private val LONG_MIN_VALUE_AS_BIG: BigInteger by lazy(LazyThreadSafetyMode.NONE)
 private val regexCache = mutableMapOf<String, Regex>()
 
 fun add(a: Any, b: Any): Any {
-    return addImpl(a, b)
-}
-
-private fun addImpl(a: Any, b: Any): Any {
     if (a is JyxalList) {
         if (b is JyxalList) {
-            return a.zip(b) { o, p -> addImpl(o, p) }.jyxal()
+            return a.zip(b) { o, p -> add(o, p) }.jyxal()
         }
-        return a.map { item: Any -> addImpl(item, b) }
+        return a.map { item: Any -> add(item, b) }
     } else if (b is JyxalList) {
-        return b.map { item: Any -> addImpl(a, item) }
+        return b.map { item: Any -> add(a, item) }
     }
     return if (a is BigComplex && b is BigComplex) {
         a + b
@@ -112,9 +108,7 @@ fun chrOrd(obj: Any): Any {
     }
 }
 
-private inline fun compare(stack: ProgramStack, predicate: (Int) -> Boolean): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+private inline fun compare(a: Any, b: Any, predicate: (Int) -> Boolean): Any {
     return if (a is BigComplex && b is BigComplex) {
         predicate(a.compareTo(b)).jyxal()
     } else {
@@ -130,9 +124,7 @@ fun complement(obj: Any): Any {
     }
 }
 
-fun contains(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+fun contains(a: Any, b: Any): Any {
     return if (a is JyxalList) {
         a.contains(b).jyxal()
     } else {
@@ -140,9 +132,7 @@ fun contains(stack: ProgramStack): Any {
     }
 }
 
-fun count(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+fun count(a: Any, b: Any): Any {
     return if (a is JyxalList) {
         a.count { it == b }
     } else {
@@ -156,9 +146,7 @@ fun count(stack: ProgramStack): Any {
     }
 }
 
-fun cumulativeGroups(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+fun cumulativeGroups(a: Any, b: Any): Any {
     return if (b is BigComplex) {
         if (a is JyxalList) {
             sequence {
@@ -190,11 +178,7 @@ fun cumulativeGroups(stack: ProgramStack): Any {
     }
 }
 
-fun divide(stack: ProgramStack): Any {
-    val o = vectorise(2, ::divide, stack)
-    if (o != null) return o
-    val b = stack.pop()
-    val a = stack.pop()
+fun divide(a: Any, b: Any): Any {
     return if (a is BigComplex) {
         if (b is BigComplex) {
             return a.divide(b, MathContext.DECIMAL128)
@@ -271,11 +255,7 @@ fun doubleRepeat(obj: Any): Any {
     }
 }
 
-fun equal(stack: ProgramStack): Any {
-    val o = vectorise(2, ::equal, stack)
-    if (o != null) return o
-    val b = stack.pop()
-    val a = stack.pop()
+fun equal(a: Any, b: Any): Any {
     return if (a is BigComplex && b is BigComplex) {
         (a == b).jyxal()
     } else {
@@ -283,11 +263,7 @@ fun equal(stack: ProgramStack): Any {
     }
 }
 
-fun exponentiate(stack: ProgramStack): Any {
-    val o = vectorise(2, ::exponentiate, stack)
-    if (o != null) return o
-    val b = stack.pop()
-    val a = stack.pop()
+fun exponentiate(a: Any, b: Any): Any {
     return if (a is BigComplex) {
         if (b is BigComplex) {
             BigComplexMath.pow(a, b, MathContext.DECIMAL128)
@@ -377,9 +353,7 @@ fun factors(obj: Any): Any {
     }
 }
 
-fun filter(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+fun filter(a: Any, b: Any): Any {
     return if (b is Lambda) {
         listify(a).filter { truthValue(b.call(it)) }
     } else {
@@ -461,14 +435,12 @@ fun getRequest(obj: Any): Any {
     return String(response, StandardCharsets.UTF_8)
 }
 
-fun greaterThan(stack: ProgramStack): Any {
-    val o = vectorise(2, ::greaterThanOrEqual, stack)
-    return o ?: compare(stack) { i: Int -> i > 0 }
+fun greaterThan(a: Any, b: Any): Any {
+    return compare(a, b) { i: Int -> i > 0 }
 }
 
-fun greaterThanOrEqual(stack: ProgramStack): Any {
-    val o = vectorise(2, ::greaterThanOrEqual, stack)
-    return o ?: compare(stack) { i: Int -> i >= 0 }
+fun greaterThanOrEqual(a: Any, b: Any): Any {
+    return compare(a, b) { i: Int -> i >= 0 }
 }
 
 fun halve(stack: ProgramStack) {
@@ -625,9 +597,7 @@ fun infiniteReplace(stack: ProgramStack): Any {
     }
 }
 
-fun interleave(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+fun interleave(a: Any, b: Any): Any {
     if (a is String && b is String) {
         return buildString {
             for (i in 0 until min(a.length, b.length)) {
@@ -757,9 +727,8 @@ fun izr(obj: Any): Any {
     }
 }
 
-fun join(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val list = listify(stack.pop())
+fun join(a: Any, b: Any): Any {
+    val list = listify(a)
     return list.joinToString(b.toString())
 }
 
@@ -802,21 +771,17 @@ fun length(obj: Any): Any {
     return if (obj is JyxalList) obj.size.jyxal() else obj.toString().length.jyxal()
 }
 
-fun lessThan(stack: ProgramStack): Any {
-    val o = vectorise(2, ::lessThan, stack)
-    return o ?: compare(stack) { i: Int -> i < 0 }
+fun lessThan(a: Any, b: Any): Any {
+    return compare(a, b) { i: Int -> i < 0 }
 }
 
-fun lessThanOrEqual(stack: ProgramStack): Any {
-    val o = vectorise(2, ::lessThanOrEqual, stack)
-    return o ?: compare(stack) { i: Int -> i <= 0 }
+fun lessThanOrEqual(a: Any, b: Any): Any {
+    return compare(a, b) { i: Int -> i <= 0 }
 }
 
 fun listi(obj: Any): Any = JyxalList.create(obj)
 
-fun logicalAnd(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+fun logicalAnd(a: Any, b: Any): Any {
     return if (truthValue(a)) {
         if (truthValue(b)) {
             a
@@ -828,9 +793,7 @@ fun logicalAnd(stack: ProgramStack): Any {
     }
 }
 
-fun logicalOr(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+fun logicalOr(a: Any, b: Any): Any {
     return if (truthValue(a)) {
         a
     } else {
@@ -842,9 +805,7 @@ fun logicalOr(stack: ProgramStack): Any {
     }
 }
 
-fun map(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+fun map(a: Any, b: Any): Any {
     return if (b is Lambda) {
         if (a is JyxalList) a.map(b::call) else listify(a).map(b::call)
     } else {
@@ -903,9 +864,7 @@ fun max(obj: Any): Any {
     return max
 }
 
-fun merge(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+fun merge(a: Any, b: Any): Any {
     return if (a is JyxalList) {
         if (b is JyxalList) {
             a.addAll(b)
@@ -943,11 +902,7 @@ fun mirror(obj: Any): Any {
     }
 }
 
-fun moduloFormat(stack: ProgramStack): Any {
-    val o = vectorise(2, ::multiCommand, stack)
-    if (o != null) return o
-    val b = stack.pop()
-    val a = stack.pop()
+fun moduloFormat(a: Any, b: Any): Any {
     return if (a is BigComplex && b is BigComplex) {
         a % b
     } else {
@@ -959,11 +914,7 @@ fun moduloFormat(stack: ProgramStack): Any {
     }
 }
 
-fun multiCommand(stack: ProgramStack): Any {
-    val o = vectorise(2, ::multiCommand, stack)
-    if (o != null) return o
-    val b = stack.pop()
-    val a = stack.pop()
+fun multiCommand(a: Any, b: Any): Any {
     return if (a is BigComplex) {
         if (b is BigComplex) {
             b loga a
@@ -994,11 +945,7 @@ fun multiCommand(stack: ProgramStack): Any {
     }
 }
 
-fun multiply(stack: ProgramStack): Any {
-    val o = vectorise(2, ::multiply, stack)
-    if (o != null) return o
-    val b = stack.pop()
-    val a = stack.pop()
+fun multiply(a: Any, b: Any): Any {
     return if (a is BigComplex) {
         if (b is BigComplex) {
             return a * b
@@ -1032,9 +979,7 @@ fun negate(obj: Any): Any {
     else obj.toString().map { if (it.isUpperCase()) it.lowercaseChar() else it.uppercaseChar() }.joinToString("")
 }
 
-fun prepend(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+fun prepend(a: Any, b: Any): Any {
     return if (a is JyxalList) {
         a.add(BigInteger.ZERO, b)
     } else if (a is BigComplex && b is BigComplex) {
@@ -1052,9 +997,7 @@ fun printToFile(stack: ProgramStack) {
     }
 }
 
-fun range(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+fun range(a: Any, b: Any): Any {
     return if (a is BigComplex) {
         when (b) {
             is BigComplex -> JyxalList.range(a, b)
@@ -1102,9 +1045,7 @@ fun reduce(stack: ProgramStack): Any {
 
 }
 
-fun remove(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+fun remove(a: Any, b: Any): Any {
     fun firstInts(f: Lambda, limit: BigInteger): JyxalList {
         return sequence {
             var i = BigInteger.ZERO
@@ -1126,9 +1067,7 @@ fun remove(stack: ProgramStack): Any {
     }
 }
 
-fun removeAtIndex(stack: ProgramStack): Any {
-    val a = stack.pop()
-    val b = stack.pop()
+fun removeAtIndex(a: Any, b: Any): Any {
     return if (a is BigComplex) {
         if (b is JyxalList) {
             return b.remove(a.re.toInt())
@@ -1188,11 +1127,7 @@ fun reverse(obj: Any): Any {
     }
 }
 
-fun sliceUntil(stack: ProgramStack): Any {
-    val o = vectorise(2, ::sliceUntil, stack)
-    if (o != null) return o
-    val b = stack.pop()
-    val a = stack.pop()
+fun sliceUntil(a: Any, b: Any): Any {
     return if (a is BigComplex) {
         sliceUntilImpl(b, a.re.toBigInteger())
     } else if (b is BigComplex) {
@@ -1220,9 +1155,7 @@ private fun sliceUntilImpl(a: Any, b: BigInteger): Any {
 
 fun sort(obj: Any): Any = listify(obj).sortedBy(::sortHelper).jyxal()
 
-fun sortByFunction(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+fun sortByFunction(a: Any, b: Any): Any {
     return if (b is Lambda) {
         listify(a).sortedBy { sortHelper(b.call(it)) }.jyxal()
     } else if (a is BigComplex && b is BigComplex) {
@@ -1240,9 +1173,7 @@ private fun sortHelper(obj: Any): BigComplex {
     }
 }
 
-fun splitOn(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+fun splitOn(a: Any, b: Any): Any {
     return if (a is JyxalList) {
         val superList = ArrayList<Any>()
         var newList = ArrayList<Any>()
@@ -1275,11 +1206,7 @@ fun sqrt(obj: Any): Any {
     }
 }
 
-fun subtract(stack: ProgramStack): Any {
-    val o = vectorise(2, ::subtract, stack)
-    if (o != null) return o
-    val b = stack.pop()
-    val a = stack.pop()
+fun subtract(a: Any, b: Any): Any {
     return if (a is BigComplex) {
         if (b is BigComplex) {
             a.subtract(b)
@@ -1296,7 +1223,7 @@ fun sum(obj: Any): Any {
         is JyxalList -> {
             var sum: Any = BigComplex.ZERO
             for (item in obj) {
-                sum = addImpl(sum, item)
+                sum = add(sum, item)
             }
             sum
         }
@@ -1331,9 +1258,7 @@ fun spaces(obj: Any): Any {
     }
 }
 
-fun strip(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+fun strip(a: Any, b: Any): Any {
     return if (a is JyxalList) {
         val iterator = a.listIterator()
         while (iterator.hasNext()) {
@@ -1449,9 +1374,7 @@ fun uniquify(obj: Any): Any {
     }
 }
 
-fun zip(stack: ProgramStack): Any {
-    val b = stack.pop()
-    val a = stack.pop()
+fun zip(a: Any, b: Any): Any {
     val toZip = if (b is Lambda) {
         listify(a).map(b::call)
     } else {
@@ -1470,38 +1393,18 @@ fun zipSelf(obj: Any): Any {
 
 fun monadVectorise(obj: Any, handle: MethodHandle): Any {
     if (obj is JyxalList) {
-        val result = ArrayList<Any>()
-        for (item in obj) {
-            result.add(monadVectorise(item, handle))
-        }
-        return result.jyxal()
+        return obj.map { monadVectorise(it, handle) }
     }
     return handle.invoke(obj)
 }
 
-fun dyadVectorise(left: Any, right: Any, handle: MethodHandle): Any {
-    if (left is JyxalList) {
-        if (right is JyxalList) {
-            val result = ArrayList<Any>()
-            val itLeft = left.iterator()
-            val itRight = right.iterator()
-            while (itLeft.hasNext() && itRight.hasNext()) {
-                result.add(dyadVectorise(itLeft.next(), itRight.next(), handle))
-            }
-            return result.jyxal()
-        } else {
-            val result = ArrayList<Any>()
-            for (item in left) {
-                result.add(dyadVectorise(item, right, handle))
-            }
-            return result.jyxal()
-        }
+fun dyadVectorise(right: Any, left: Any, handle: MethodHandle): Any {
+    if (left is JyxalList && right is JyxalList) {
+        return left.zip(right) { l, r -> dyadVectorise(r, l, handle) }
+    } else if (left is JyxalList) {
+        return left.map { dyadVectorise(right, it, handle) }
     } else if (right is JyxalList) {
-        val result = ArrayList<Any>()
-        for (item in right) {
-            result.add(dyadVectorise(left, item, handle))
-        }
-        return result.jyxal()
+        return right.map { dyadVectorise(it, left, handle) }
     } else {
         return handle.invoke(left, right)
     }

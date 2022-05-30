@@ -3,7 +3,6 @@ package io.github.seggan.myxal.compiler.jvm
 import io.github.seggan.myxal.compiler.Element
 import io.github.seggan.myxal.compiler.ICompiler
 import io.github.seggan.myxal.compiler.MyxalCompileException
-// import io.github.seggan.myxal.compiler.jvm.msplit.SplitMethod
 import io.github.seggan.myxal.compiler.jvm.wrappers.Loop
 import io.github.seggan.myxal.compiler.jvm.wrappers.MyxalClassWriter
 import io.github.seggan.myxal.compiler.jvm.wrappers.MyxalMethod
@@ -202,6 +201,7 @@ class JvmCompiler(options: CommandLine) : ICompiler<ByteArray>(options) {
                 2 -> {
                     AsmHelper.pop(mv)
                     AsmHelper.pop(mv)
+                    mv.visitInsn(SWAP);
                     if (element.vectorise) {
                         mv.visitLdcInsn(
                             Handle(
