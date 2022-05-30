@@ -3,7 +3,6 @@ package io.github.seggan.myxal.compiler.jvm
 import io.github.seggan.myxal.compiler.Element
 import io.github.seggan.myxal.compiler.ICompiler
 import io.github.seggan.myxal.compiler.MyxalCompileException
-import io.github.seggan.myxal.compiler.jvm.msplit.SplitMethod
 import io.github.seggan.myxal.compiler.jvm.wrappers.Loop
 import io.github.seggan.myxal.compiler.jvm.wrappers.MyxalClassWriter
 import io.github.seggan.myxal.compiler.jvm.wrappers.MyxalMethod
@@ -21,7 +20,6 @@ import io.github.seggan.myxal.compiler.util.CallStack
 import io.github.seggan.myxal.compiler.util.screamingSnakeCaseToCamelCase
 import org.apache.commons.cli.CommandLine
 import org.objectweb.asm.ClassReader
-import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.Handle
 import org.objectweb.asm.Label
@@ -33,7 +31,7 @@ import java.io.FileOutputStream
 import java.io.PrintWriter
 import java.util.ArrayDeque
 
-class JvmCompiler(options: CommandLine) : ICompiler<ByteArray>(options) {
+class JvmCompiler(options: CommandLine, val isTest: Boolean) : ICompiler<ByteArray>(options) {
 
     private val callStack = CallStack<MyxalMethod>()
     private val loopStack = object : ArrayDeque<Loop>() {
@@ -93,22 +91,32 @@ class JvmCompiler(options: CommandLine) : ICompiler<ByteArray>(options) {
         clinit.visitEnd()
 
         main.loadStack()
-        main.visitMethodInsn(
-            INVOKEVIRTUAL,
-            "runtime/ProgramStack",
-            "pop",
-            "()Ljava/lang/Object;",
-            false
-        )
-        main.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;")
-        main.visitInsn(SWAP)
-        main.visitMethodInsn(
-            INVOKEVIRTUAL,
-            "java/io/PrintStream",
-            "println",
-            "(Ljava/lang/Object;)V",
-            false
-        )
+        if (isTest) {
+            main.visitMethodInsn(
+                INVOKESTATIC,
+                "io/github/seggan/myxal/app/TestHelper",
+                "sendStack",
+                "(Lruntime/ProgramStack;)V",
+                false
+            )
+        } else {
+            main.visitMethodInsn(
+                INVOKEVIRTUAL,
+                "runtime/ProgramStack",
+                "pop",
+                "()Ljava/lang/Object;",
+                false
+            )
+            main.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;")
+            main.visitInsn(SWAP)
+            main.visitMethodInsn(
+                INVOKEVIRTUAL,
+                "java/io/PrintStream",
+                "println",
+                "(Ljava/lang/Object;)V",
+                false
+            )
+        }
         main.visitInsn(RETURN)
         try {
             main.visitMaxs(0, 0)

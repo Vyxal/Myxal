@@ -22,6 +22,7 @@ build/
 
 # And my testing files
 test*.*
+!TestHelper.kt
 
 gen/
 bin/

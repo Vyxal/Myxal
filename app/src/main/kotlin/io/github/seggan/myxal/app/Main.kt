@@ -44,8 +44,10 @@ object Main {
         options.addOption("c", "codepage", false, "Use the Myxal codepage")
         options.addOption("d", "debug", false, "Print debug stuff")
         options.addOption("p", "platform", true, "Platform to compile for")
-        options.addOption(Option.builder("f").longOpt("file").hasArg()
-            .desc("Input file").required().build())
+        options.addOption(
+            Option.builder("f").longOpt("file").hasArg()
+                .desc("Input file").required().build()
+        )
         options.addOption("O", "nooptimize", false, "Do not optimize")
 
         val cmd = cmdParser.parse(options, args)
@@ -72,7 +74,7 @@ object Main {
         println("Compiling program...")
         val fileName = inputFile.substring(0, inputFile.lastIndexOf('.'))
         if (platform == SupportedPlatform.JVM) {
-            val main = JvmCompiler(cmd).compile(transformed)
+            val main = JvmCompiler(cmd, false).compile(transformed)
             val cr = ClassReader(main)
             FileOutputStream("debug.log").use { os ->
                 val tcv = TraceClassVisitor(PrintWriter(os))
@@ -99,10 +101,9 @@ object Main {
                     jar.putNextEntry(entry)
                     if (isTest) Files.newInputStream(buildDir.resolve(resource)) else Main::class.java.getResourceAsStream(
                         "/$resource"
-                    )
-                        .use { inp ->
-                            inp?.copyTo(jar) ?: println("Skipping resource: $resource")
-                        }
+                    ).use { inp ->
+                        inp?.copyTo(jar) ?: println("Skipping resource: $resource")
+                    }
                 }
                 val manifest = Manifest()
                 manifest.mainAttributes[Attributes.Name.MANIFEST_VERSION] = "1.0"
