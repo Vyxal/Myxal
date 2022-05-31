@@ -64,7 +64,7 @@ object Main {
         } else if (cmd.hasOption("C")) {
             cmd.getOptionValue("C").toByteArray()
         } else {
-            throw RuntimeException("Either file or code must be given as arguments")
+            throw MyxalCompileException("Either file or code must be given as arguments")
         }
         val s: String = if (cmd.hasOption("c")) {
             val sb = StringBuilder()
