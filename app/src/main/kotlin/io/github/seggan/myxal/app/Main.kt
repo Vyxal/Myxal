@@ -2,15 +2,13 @@ package io.github.seggan.myxal.app
 
 import io.github.seggan.myxal.antlr.MyxalLexer
 import io.github.seggan.myxal.antlr.MyxalParser
+import io.github.seggan.myxal.compiler.MyxalCompileException
 import io.github.seggan.myxal.compiler.cpp.NativeCompiler
 import io.github.seggan.myxal.compiler.jvm.JvmCompiler
-import io.github.seggan.myxal.compiler.tree.Node
 import io.github.seggan.myxal.runtime.text.Compression
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
-import org.apache.commons.cli.CommandLine
 import org.apache.commons.cli.DefaultParser
-import org.apache.commons.cli.Option
 import org.apache.commons.cli.Options
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.util.TraceClassVisitor
@@ -23,8 +21,6 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.PrintWriter
-import java.net.URL
-import java.net.URLClassLoader
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
