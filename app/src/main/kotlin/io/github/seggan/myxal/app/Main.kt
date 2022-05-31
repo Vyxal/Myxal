@@ -4,9 +4,11 @@ import io.github.seggan.myxal.antlr.MyxalLexer
 import io.github.seggan.myxal.antlr.MyxalParser
 import io.github.seggan.myxal.compiler.cpp.NativeCompiler
 import io.github.seggan.myxal.compiler.jvm.JvmCompiler
+import io.github.seggan.myxal.compiler.tree.Node
 import io.github.seggan.myxal.runtime.text.Compression
 import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
+import org.apache.commons.cli.CommandLine
 import org.apache.commons.cli.DefaultParser
 import org.apache.commons.cli.Option
 import org.apache.commons.cli.Options
@@ -21,6 +23,8 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.PrintWriter
+import java.net.URL
+import java.net.URLClassLoader
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
@@ -31,9 +35,12 @@ import java.util.jar.Attributes
 import java.util.jar.JarEntry
 import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
+import java.util.regex.Pattern
 
 object Main {
-    private const val runtimeClasses = "/build/runtime-classes"
+    private const val runtimeClasses = "../runtime/build/runtimeLibs"
+
+    private val p = Pattern.compile("\\..*$")
 
     @JvmStatic
     fun doMain(args: Array<String>, isTest: Boolean) {
@@ -41,20 +48,24 @@ object Main {
 
         val options = Options()
         options.addOption("h", "help", false, "Print this help message")
-        options.addOption("c", "codepage", false, "Use the Myxal codepage")
-        options.addOption("d", "debug", false, "Print debug stuff")
-        options.addOption("p", "platform", true, "Platform to compile for")
-        options.addOption(
-            Option.builder("f").longOpt("file").hasArg()
-                .desc("Input file").required().build()
-        )
-        options.addOption("O", "nooptimize", false, "Do not optimize")
+            .addOption("c", "codepage", false, "Use the Myxal codepage")
+            .addOption("d", "debug", false, "Print debug stuff")
+            .addOption("p", "platform", true, "Platform to compile for")
+            .addOption("f", "file", true, "Input file")
+            .addOption("C", "code", true, "Input code")
+            .addOption("O", "nooptimize", false, "Do not optimize")
 
         val cmd = cmdParser.parse(options, args)
 
         println("Parsing program...")
-        val inputFile = cmd.getOptionValue("f")
-        val bytes: ByteArray = Files.readAllBytes(Path.of(inputFile))
+        val inputFile = if (cmd.hasOption("f")) cmd.getOptionValue("f") else "Input"
+        val bytes = if (cmd.hasOption("f")) {
+            Files.readAllBytes(Path.of(cmd.getOptionValue("f")))
+        } else if (cmd.hasOption("C")) {
+            cmd.getOptionValue("C").toByteArray()
+        } else {
+            throw MyxalCompileException("Either file or code must be given as arguments")
+        }
         val s: String = if (cmd.hasOption("c")) {
             val sb = StringBuilder()
             for (b in bytes) {
@@ -72,7 +83,8 @@ object Main {
             println(transformed)
         }
         println("Compiling program...")
-        val fileName = inputFile.substring(0, inputFile.lastIndexOf('.'))
+        val extIndex = inputFile.lastIndexOf('.')
+        val fileName = if (extIndex == -1) inputFile else inputFile.substring(0, extIndex)
         if (platform == SupportedPlatform.JVM) {
             val main = JvmCompiler(cmd, false).compile(transformed)
             val cr = ClassReader(main)

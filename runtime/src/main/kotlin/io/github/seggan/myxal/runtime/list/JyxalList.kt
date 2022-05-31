@@ -93,16 +93,17 @@ abstract class JyxalList : Collection<Any> {
         val sb = StringBuilder()
         sb.append("⟨")
         val it = list.iterator()
-        while (true) {
-            if (!it.hasNext()) {
-                if (sb.length > 1) {
-                    sb.delete(sb.length - 3, sb.length)
-                }
-                return sb.append("⟩").toString()
+        var isFirst = true
+        while (it.hasNext()) {
+            if (isFirst) {
+                isFirst = false
+            } else {
+                sb.append(" | ")
             }
             sb.append(it.next())
-            sb.append(" | ")
         }
+        sb.append("⟩")
+        return sb.toString()
     }
 
     /**
