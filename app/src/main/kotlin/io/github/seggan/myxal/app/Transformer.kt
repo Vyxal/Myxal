@@ -133,8 +133,8 @@ class Transformer private constructor() : MyxalParserBaseVisitor<List<Node>>() {
     override fun visitList(ctx: ListContext): List<Node> {
         val list = mutableListOf<Node>()
         for (element in ctx.program()) {
-            if (element.childCount == 1 && element.getChild(0) is LiteralContext) {
-                list.addAll(visit(element.getChild(0)))
+            if (element.program_node().size == 1 && element.program_node(0).literal() != null) {
+                list.addAll(visit(element.program_node(0).literal()))
             } else {
                 list.add(BlockNode(visit(element)))
             }
@@ -202,6 +202,7 @@ class Transformer private constructor() : MyxalParserBaseVisitor<List<Node>>() {
 
         fun transform(program: FileContext, platform: SupportedPlatform): List<Node> {
             val transformer = Transformer()
+            STDLIB.reset()
             transformer.visit(STDLIB.file())
             transformer.aliases = transformer.aliases.filterKeys { !platform.overrides.contains(it) }.toMutableMap()
             return transformer.visit(program)

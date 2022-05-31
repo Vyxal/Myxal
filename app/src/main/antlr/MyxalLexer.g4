@@ -41,10 +41,6 @@ ALPHA
     : [A-Za-z]
     ;
 
-WHITESPACE
-    : [ \t\r\n]
-    ;
-
 ASSN_SIGN
     : '→' | '←'
     ;
@@ -67,6 +63,10 @@ SINGLE_CHAR_STRING
 
 DOUBLE_CHAR_STRING
     : '‛' . .
+    ;
+
+WHITESPACE
+    : [ \t\r\n]
     ;
 
 // syntax elements
@@ -99,11 +99,11 @@ FOR_CLOSE
     ;
 
 LIST_OPEN
-    : '⟨'
+    : '⟨' | '@['
     ;
 
 LIST_CLOSE
-    : '⟩'
+    : '⟩' | '@]'
     ;
 
 PERIOD

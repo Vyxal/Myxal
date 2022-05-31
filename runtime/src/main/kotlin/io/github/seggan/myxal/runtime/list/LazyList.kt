@@ -259,7 +259,7 @@ internal class LazyList(private val generator: Iterator<Any>) : JyxalList() {
     }
 
     override fun toString(): String {
-        return "A lazy list, including " + vyxalListFormat(backing)
+        return toNonLazy().toString()
     }
 
     private fun fill(index: Int) {

@@ -14,16 +14,14 @@ abstract class JyxalList : Collection<Any> {
             return LazyList(generator)
         }
 
+        @JvmStatic
         fun create(vararg array: Any): JyxalList {
             return FiniteList(listOf(*array))
         }
 
+        @JvmStatic
         fun create(collection: Collection<Any>): JyxalList {
             return FiniteList(collection.toList())
-        }
-
-        fun create(list: List<Any>): JyxalList {
-            return FiniteList(ArrayList(list))
         }
 
         @JvmStatic

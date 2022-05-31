@@ -59,7 +59,8 @@ fun optimise(codeBlock: InsnList, myxalMethod: MyxalMethod) {
                     codeBlock.insertBefore(insn, InsnNode(SWAP))
                 }
             } else if (insn.desc.startsWith("(Lio/github/seggan/myxal/runtime/ProgramStack;)") ||
-                    insn.name == "create") {
+                insn.desc.startsWith("(Ljava/util/Collection;)")
+            ) {
                 // these all take the stack as input
                 codeBlock.insertBefore(insn, VarInsnNode(ALOAD, myxalMethod.stackVar))
             }
