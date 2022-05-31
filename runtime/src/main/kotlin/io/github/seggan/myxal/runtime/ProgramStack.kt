@@ -36,7 +36,7 @@ class ProgramStack : ArrayDeque<Any?>, Deque<Any?> {
         input = null
     }
 
-    constructor(vararg objects: Any?) : super(listOf(*objects)) {
+    constructor(vararg objects: Any?) : super(listOf(*objects).reversed()) {
         input = arrayOf(objects)
         flags = null
     }
