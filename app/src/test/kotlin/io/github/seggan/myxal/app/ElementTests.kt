@@ -21,6 +21,13 @@ class ElementTests {
         TestHelper.assertTopEquals("@[1|2|4@] 2+", "[3|4|6]")
         TestHelper.assertTopEquals("@[1|2|3@]@[1|2|3@]+", "[2|4|6]")
 
+        TestHelper.assertTopEquals("5b", "[1|0|1]")
+        TestHelper.assertTopEquals("@[1|2|5@]b", "[[1]|[1|0]|[1|0|1]]")
+
+        TestHelper.assertTopEquals("5⌐", "-4")
+        TestHelper.assertTopEquals("\"Hello, World!\"⌐", "[Hello| World!]")
+        TestHelper.assertTopEquals("@[1|2|5@]⌐", "[0|-1|-4]")
+
         TestHelper.assertTopEquals("1 1-", "0")
         TestHelper.assertTopEquals("2 \"a\"-", "--a")
         TestHelper.assertTopEquals("\"a\" 2-", "a--")

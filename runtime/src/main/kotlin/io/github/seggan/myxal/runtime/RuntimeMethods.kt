@@ -90,15 +90,15 @@ fun any(obj: Any): Any {
 }
 
 fun binary(obj: Any): Any {
-    return if (obj is Int) {
-        binHelper(obj)
+    return if (obj is BigComplex) {
+        binHelper(obj.toInt())
     } else {
         obj.toString().map { binHelper(it.code) }.jyxal()
     }
 }
 
 fun binHelper(i: Int): JyxalList {
-    return i.toString(2).map { it.toString().toInt().jyxal() }.jyxal()
+    return i.toString(2).map { (it - '0').jyxal() }.jyxal()
 }
 
 fun chrOrd(obj: Any): Any {
