@@ -1,6 +1,9 @@
 package io.github.seggan.myxal.app
 
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions
+import io.github.seggan.myxal.runtime.jyxal
+import io.github.seggan.myxal.runtime.list.JyxalList
 
 class ElementTests {
 

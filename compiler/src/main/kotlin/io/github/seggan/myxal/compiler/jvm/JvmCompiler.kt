@@ -207,6 +207,38 @@ class JvmCompiler(options: CommandLine, val isTest: Boolean) : ICompiler<ByteArr
                     }
                     AsmHelper.push(mv)
                 }
+                2 -> {
+                    AsmHelper.pop(mv)
+                    AsmHelper.pop(mv)
+                    mv.visitInsn(SWAP);
+                    if (element.vectorise) {
+                        mv.visitLdcInsn(
+                            Handle(
+                                H_INVOKESTATIC,
+                                "runtime/RuntimeMethods",
+                                name,
+                                "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+                                false
+                            )
+                        )
+                        mv.visitMethodInsn(
+                            INVOKESTATIC,
+                            "runtime/RuntimeMethods",
+                            "dyadVectorise",
+                            "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/invoke/MethodHandle;)Ljava/lang/Object;",
+                            false
+                        )
+                    } else {
+                        mv.visitMethodInsn(
+                            INVOKESTATIC,
+                            "runtime/RuntimeMethods",
+                            name,
+                            "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
+                            false
+                        )
+                    }
+                    AsmHelper.push(mv)
+                }
                 else -> {
                     mv.loadStack()
                     mv.visitMethodInsn(
