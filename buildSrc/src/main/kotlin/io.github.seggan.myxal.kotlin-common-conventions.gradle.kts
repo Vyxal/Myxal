@@ -40,9 +40,19 @@ tasks.compileJava {
     targetCompatibility = "11"
 }
 
-tasks.compileKotlin {
-    kotlinOptions {
-        jvmTarget = "11"
-        freeCompilerArgs = freeCompilerArgs + listOf("-Xno-param-assertions", "-Xjvm-default=all-compatibility")
+val kotlinCompilerArgs = listOf("-Xno-param-assertions", "-Xjvm-default=all-compatibility")
+
+tasks {
+    compileKotlin {
+        kotlinOptions {
+            jvmTarget = "11"
+            freeCompilerArgs += kotlinCompilerArgs
+        }
+    }
+    compileTestKotlin {
+        kotlinOptions {
+            jvmTarget = "11"
+            freeCompilerArgs += kotlinCompilerArgs
+        }
     }
 }
