@@ -15,3 +15,9 @@ repositories {
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-gradle-plugin")
 }
+
+tasks.compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "11"
+    }
+}
