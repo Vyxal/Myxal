@@ -1,32 +1,32 @@
 package io.github.seggan.myxal.runtime.list
 
 import io.github.seggan.myxal.runtime.ProgramStack
-import io.github.seggan.myxal.runtime.jyxal
 import io.github.seggan.myxal.runtime.math.BigComplex
+import io.github.seggan.myxal.runtime.myxal
 import io.github.seggan.myxal.runtime.plus
 import java.math.BigInteger
 
-abstract class JyxalList : Collection<Any> {
+abstract class MyxalList : Collection<Any> {
 
     companion object {
 
-        fun create(generator: Iterator<Any>): JyxalList {
+        fun create(generator: Iterator<Any>): MyxalList {
             return LazyList(generator)
         }
 
         @JvmStatic
-        fun create(vararg array: Any): JyxalList {
+        fun create(vararg array: Any): MyxalList {
             return FiniteList(listOf(*array))
         }
 
         @JvmStatic
-        fun create(collection: Collection<Any>): JyxalList {
+        fun create(collection: Collection<Any>): MyxalList {
             return FiniteList(collection.toList())
         }
 
         @JvmStatic
         @Suppress("UNNECESSARY_NOT_NULL_ASSERTION")
-        fun create(stack: ProgramStack): JyxalList {
+        fun create(stack: ProgramStack): MyxalList {
             val list = ArrayList<Any>(stack.size)
             while (!stack.isEmpty()) {
                 list.add(stack.removeLast()!!)
@@ -34,14 +34,14 @@ abstract class JyxalList : Collection<Any> {
             return FiniteList(list)
         }
 
-        fun create(): JyxalList {
+        fun create(): MyxalList {
             return FiniteList()
         }
 
         /**
          * Create an infinite list
          */
-        fun createInf(generator: () -> Any): JyxalList {
+        fun createInf(generator: () -> Any): MyxalList {
             return LazyList(object : Iterator<Any> {
                 override fun hasNext(): Boolean {
                     return true
@@ -53,7 +53,7 @@ abstract class JyxalList : Collection<Any> {
             })
         }
 
-        fun range(start: BigComplex, end: BigComplex): JyxalList {
+        fun range(start: BigComplex, end: BigComplex): MyxalList {
             return LazyList(object : Iterator<BigComplex> {
                 var current = start
 
@@ -69,7 +69,7 @@ abstract class JyxalList : Collection<Any> {
             })
         }
 
-        fun range(start: Int, end: Int): JyxalList {
+        fun range(start: Int, end: Int): MyxalList {
             return LazyList(object : Iterator<BigComplex> {
                 var current = start
 
@@ -79,12 +79,12 @@ abstract class JyxalList : Collection<Any> {
 
                 override fun next(): BigComplex {
                     val result = current++
-                    return result.jyxal()
+                    return result.myxal()
                 }
             })
         }
 
-        fun fromIterableLazy(iterable: Iterable<Any>): JyxalList {
+        fun fromIterableLazy(iterable: Iterable<Any>): MyxalList {
             return LazyList(iterable.iterator())
         }
     }
@@ -113,10 +113,10 @@ abstract class JyxalList : Collection<Any> {
 
     abstract fun isLazy(): Boolean
 
-    abstract fun toNonLazy(): JyxalList
+    abstract fun toNonLazy(): MyxalList
 
     abstract operator fun get(ind: Int): Any
-    abstract operator fun get(ind: IntProgression): JyxalList
+    abstract operator fun get(ind: IntProgression): MyxalList
 
     abstract fun hasAtLeast(amount: Int): Boolean
 
@@ -126,25 +126,27 @@ abstract class JyxalList : Collection<Any> {
         return listIterator()
     }
 
-    abstract fun remove(ind: Int): JyxalList
+    abstract fun remove(ind: Int): MyxalList
 
-    abstract fun map(f: (Any) -> Any): JyxalList
+    abstract fun map(f: (Any) -> Any): MyxalList
 
-    abstract fun filter(pred: (Any) -> Boolean): JyxalList
+    abstract fun filter(pred: (Any) -> Boolean): MyxalList
 
-    abstract fun add(ind: BigInteger, value: Any): JyxalList
+    abstract fun add(ind: BigInteger, value: Any): MyxalList
 
-    abstract fun add(value: Any): JyxalList
+    abstract fun add(value: Any): MyxalList
 
-    abstract fun addAll(iterable: Iterable<Any>): JyxalList
+    abstract fun addAll(iterable: Iterable<Any>): MyxalList
 
-    abstract fun zip(iterable: Iterable<Any>): JyxalList
+    fun zip(iterable: Iterable<Any>): MyxalList {
+        return zipmap(iterable, MyxalList::create)
+    }
 
-    abstract fun zip(iterable: Iterable<Any>, f: (Any, Any) -> Any): JyxalList
+    abstract fun zipmap(iterable: Iterable<Any>, f: (Any, Any) -> Any): MyxalList
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is JyxalList) return false
+        if (other !is MyxalList) return false
 
         val it1 = this.iterator()
         val it2 = other.iterator()

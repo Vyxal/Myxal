@@ -3,7 +3,7 @@ package io.github.seggan.myxal.runtime.list
 import io.github.seggan.myxal.runtime.math.BigComplex
 import java.math.BigInteger
 
-internal class LazyList(private val generator: Iterator<Any>) : JyxalList() {
+internal class LazyList(private val generator: Iterator<Any>) : MyxalList() {
 
     private val backing: MutableList<Any> = ArrayList()
 
@@ -47,7 +47,7 @@ internal class LazyList(private val generator: Iterator<Any>) : JyxalList() {
         }
     }
 
-    override fun get(ind: IntProgression): JyxalList {
+    override fun get(ind: IntProgression): MyxalList {
         val it = this.iterator()
         for (i in 0 until ind.first) {
             it.next()
@@ -85,7 +85,7 @@ internal class LazyList(private val generator: Iterator<Any>) : JyxalList() {
         return true
     }
 
-    override fun toNonLazy(): JyxalList {
+    override fun toNonLazy(): MyxalList {
         val newList = ArrayList<Any>()
         for (elm in this) {
             newList.add(elm)
@@ -112,7 +112,7 @@ internal class LazyList(private val generator: Iterator<Any>) : JyxalList() {
         }
     }
 
-    override fun remove(ind: Int): JyxalList {
+    override fun remove(ind: Int): MyxalList {
         val it = this.iterator()
         return LazyList(object : Iterator<Any> {
             var current = 0
@@ -132,7 +132,7 @@ internal class LazyList(private val generator: Iterator<Any>) : JyxalList() {
         })
     }
 
-    override fun map(f: (Any) -> Any): JyxalList {
+    override fun map(f: (Any) -> Any): MyxalList {
         val it = this.iterator()
         return LazyList(object : Iterator<Any> {
             override fun hasNext(): Boolean {
@@ -145,7 +145,7 @@ internal class LazyList(private val generator: Iterator<Any>) : JyxalList() {
         })
     }
 
-    override fun filter(pred: (Any) -> Boolean): JyxalList {
+    override fun filter(pred: (Any) -> Boolean): MyxalList {
         val it = this.iterator()
         return LazyList(object : Iterator<Any> {
             override fun hasNext(): Boolean {
@@ -165,7 +165,7 @@ internal class LazyList(private val generator: Iterator<Any>) : JyxalList() {
         })
     }
 
-    override fun add(ind: BigInteger, value: Any): JyxalList {
+    override fun add(ind: BigInteger, value: Any): MyxalList {
         val it = this.iterator()
         return LazyList(object : Iterator<Any> {
             var current = BigInteger.ZERO
@@ -185,7 +185,7 @@ internal class LazyList(private val generator: Iterator<Any>) : JyxalList() {
         })
     }
 
-    override fun add(value: Any): JyxalList {
+    override fun add(value: Any): MyxalList {
         val it = this.iterator()
         return LazyList(object : Iterator<Any> {
 
@@ -206,7 +206,7 @@ internal class LazyList(private val generator: Iterator<Any>) : JyxalList() {
         })
     }
 
-    override fun addAll(iterable: Iterable<Any>): JyxalList {
+    override fun addAll(iterable: Iterable<Any>): MyxalList {
         val it = this.iterator()
         return LazyList(object : Iterator<Any> {
 
@@ -226,23 +226,7 @@ internal class LazyList(private val generator: Iterator<Any>) : JyxalList() {
         })
     }
 
-    override fun zip(iterable: Iterable<Any>): JyxalList {
-        val it = this.iterator()
-        return LazyList(object : Iterator<Any> {
-
-            private val listIt = iterable.iterator()
-
-            override fun hasNext(): Boolean {
-                return it.hasNext() && listIt.hasNext()
-            }
-
-            override fun next(): Any {
-                return create(it.next(), listIt.next())
-            }
-        })
-    }
-
-    override fun zip(iterable: Iterable<Any>, f: (Any, Any) -> Any): JyxalList {
+    override fun zipmap(iterable: Iterable<Any>, f: (Any, Any) -> Any): MyxalList {
         val it = this.iterator()
         return LazyList(object : Iterator<Any> {
 

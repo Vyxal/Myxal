@@ -1,29 +1,29 @@
 package io.github.seggan.myxal.runtime
 
-import io.github.seggan.myxal.runtime.list.JyxalList
+import io.github.seggan.myxal.runtime.list.MyxalList
 import io.github.seggan.myxal.runtime.math.BigComplex
 import java.math.BigDecimal
 import java.math.BigInteger
 
-fun List<Any>.jyxal(): JyxalList = JyxalList.create(this)
+fun List<Any>.myxal(): MyxalList = MyxalList.create(this)
 
 @JvmName("nullableJyxal")
-fun List<Any?>.jyxal(): JyxalList {
+fun List<Any?>.myxal(): MyxalList {
     val result = ArrayList<Any>()
     for (item in this) {
         result.add(item!!)
     }
-    return JyxalList.create(this)
+    return MyxalList.create(this)
 }
 
-fun Iterable<Any>.jyxal(): JyxalList = JyxalList.fromIterableLazy(this)
-fun Sequence<Any>.jyxal(): JyxalList = JyxalList.create(this.iterator())
+fun Iterable<Any>.myxal(): MyxalList = MyxalList.fromIterableLazy(this)
+fun Sequence<Any>.myxal(): MyxalList = MyxalList.create(this.iterator())
 
-fun Boolean.jyxal(): BigComplex = if (this) BigComplex.ONE else BigComplex.ZERO
-fun Int.jyxal(): BigComplex = BigComplex.valueOf(this.toLong())
-fun Long.jyxal(): BigComplex = BigComplex.valueOf(this)
-fun BigInteger.jyxal(): BigComplex = BigComplex.valueOf(this.toBigDecimal())
-fun BigDecimal.jyxal(): BigComplex = BigComplex.valueOf(this)
+fun Boolean.myxal(): BigComplex = if (this) BigComplex.ONE else BigComplex.ZERO
+fun Int.myxal(): BigComplex = BigComplex.valueOf(this.toLong())
+fun Long.myxal(): BigComplex = BigComplex.valueOf(this)
+fun BigInteger.myxal(): BigComplex = BigComplex.valueOf(this.toBigDecimal())
+fun BigDecimal.myxal(): BigComplex = BigComplex.valueOf(this)
 
 operator fun <T> List<T>.times(n: Int): List<T> {
     val result = ArrayList<T>()

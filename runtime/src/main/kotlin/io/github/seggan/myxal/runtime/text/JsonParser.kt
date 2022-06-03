@@ -1,8 +1,8 @@
 package io.github.seggan.myxal.runtime.text
 
-import io.github.seggan.myxal.runtime.jyxal
-import io.github.seggan.myxal.runtime.list.JyxalList
+import io.github.seggan.myxal.runtime.list.MyxalList
 import io.github.seggan.myxal.runtime.math.BigComplex
+import io.github.seggan.myxal.runtime.myxal
 import io.github.seggan.myxal.runtime.unescapeString
 import java.math.BigDecimal
 
@@ -33,17 +33,17 @@ class JsonParser(private val json: String) {
 
     private fun parseTrue(): BigComplex {
         index += 4
-        return true.jyxal()
+        return true.myxal()
     }
 
     private fun parseFalse(): BigComplex {
         index += 5
-        return false.jyxal()
+        return false.myxal()
     }
 
     private fun parseNull(): BigComplex {
         index += 4
-        return false.jyxal()
+        return false.myxal()
     }
 
     private fun parseNumber(): BigComplex {
@@ -56,16 +56,16 @@ class JsonParser(private val json: String) {
             sb.append(json[index])
             index++
         }
-        return BigDecimal(sb.toString()).jyxal()
+        return BigDecimal(sb.toString()).myxal()
     }
 
-    private fun parseArray(): JyxalList {
+    private fun parseArray(): MyxalList {
         index++
         skipWhitespace()
         val result = ArrayList<Any>()
         if (json[index] == ']') {
             index++
-            return result.jyxal()
+            return result.myxal()
         }
         while (true) {
             checkEnd()
@@ -82,16 +82,16 @@ class JsonParser(private val json: String) {
             index++
             skipWhitespace()
         }
-        return result.jyxal()
+        return result.myxal()
     }
 
-    private fun parseObject(): JyxalList {
+    private fun parseObject(): MyxalList {
         index++
         skipWhitespace()
         val result = ArrayList<Any>()
         if (json[index] == '}') {
             index++
-            return result.jyxal()
+            return result.myxal()
         }
         while (true) {
             checkEnd()
@@ -104,7 +104,7 @@ class JsonParser(private val json: String) {
             index++
             skipWhitespace()
             checkEnd()
-            result.add(JyxalList.create(key, parseValue()))
+            result.add(MyxalList.create(key, parseValue()))
             skipWhitespace()
             checkEnd()
             if (json[index] == '}') {
@@ -117,7 +117,7 @@ class JsonParser(private val json: String) {
             index++
             skipWhitespace()
         }
-        return result.jyxal()
+        return result.myxal()
     }
 
     private fun parseString(): String {

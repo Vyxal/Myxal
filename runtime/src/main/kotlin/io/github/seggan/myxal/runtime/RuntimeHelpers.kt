@@ -3,7 +3,7 @@
 
 package io.github.seggan.myxal.runtime
 
-import io.github.seggan.myxal.runtime.list.JyxalList
+import io.github.seggan.myxal.runtime.list.MyxalList
 import io.github.seggan.myxal.runtime.math.BigComplex
 import jdk.jshell.JShell
 import jdk.jshell.Snippet
@@ -25,8 +25,8 @@ private val LIST_PATTERN: Pattern by lazy(LazyThreadSafetyMode.NONE) { Pattern.c
 
 fun applyLambda(lambda: Lambda, obj: Any): Any {
     when (obj) {
-        is JyxalList -> {
-            val newList = JyxalList.create()
+        is MyxalList -> {
+            val newList = MyxalList.create()
             for (item in obj) {
                 newList.add(applyLambda(lambda, item))
             }
@@ -34,7 +34,7 @@ fun applyLambda(lambda: Lambda, obj: Any): Any {
         }
         is BigComplex -> {
             val current = BigComplex.ONE
-            val list = JyxalList.create()
+            val list = MyxalList.create()
             while (current <= obj) {
                 list.add(lambda.call(current))
             }
@@ -42,7 +42,7 @@ fun applyLambda(lambda: Lambda, obj: Any): Any {
         }
         else -> {
             val s = obj.toString()
-            val list = JyxalList.create()
+            val list = MyxalList.create()
             for (c in s) {
                 list.add(lambda.call(c.toString()))
             }
@@ -86,7 +86,7 @@ fun eval(expr: String): Any {
     } else {
         val matcher: Matcher = LIST_PATTERN.matcher(expr)
         return if (matcher.matches()) {
-            val list = JyxalList.create()
+            val list = MyxalList.create()
             while (matcher.find()) {
                 list.add(eval(matcher.group(1)))
             }
@@ -101,15 +101,15 @@ fun eval(expr: String): Any {
 
 fun filterLambda(lambda: Lambda, obj: Any): Any {
     return when (obj) {
-        is JyxalList -> {
+        is MyxalList -> {
             obj.filter { truthValue(lambda.call(it)) }
         }
         is BigComplex -> {
-            JyxalList.range(BigComplex.ONE, obj).filter { truthValue(lambda.call(it)) }
+            MyxalList.range(BigComplex.ONE, obj).filter { truthValue(lambda.call(it)) }
         }
         else -> {
             val s = obj.toString()
-            val list = JyxalList.create()
+            val list = MyxalList.create()
             for (c in s) {
                 if (truthValue(lambda.call(c.toString()))) {
                     list.add(c.toString())
@@ -153,7 +153,7 @@ fun fromBaseDigitsAlphabet(digits: CharSequence, alphabet: String): Int {
 }
 
 fun iterator(obj: Any): Iterator<Any> {
-    if (obj is JyxalList) {
+    if (obj is MyxalList) {
         return obj.iterator()
     } else {
         val s = obj.toString()
@@ -172,32 +172,32 @@ fun iterator(obj: Any): Iterator<Any> {
 }
 
 fun len(obj: Any): Int {
-    return if (obj is JyxalList) {
+    return if (obj is MyxalList) {
         obj.size
     } else {
         obj.toString().length
     }
 }
 
-fun listify(obj: Any): JyxalList {
-    return if (obj is JyxalList) {
+fun listify(obj: Any): MyxalList {
+    return if (obj is MyxalList) {
         obj
     } else {
-        JyxalList.create(iterator(obj))
+        MyxalList.create(iterator(obj))
     }
 }
 
 fun mapLambda(lambda: Lambda, obj: Any): Any {
     return when (obj) {
-        is JyxalList -> {
+        is MyxalList -> {
             obj.map { lambda.call(it) }
         }
         is BigComplex -> {
-            JyxalList.range(BigComplex.ONE, obj).map { lambda.call(it) }
+            MyxalList.range(BigComplex.ONE, obj).map { lambda.call(it) }
         }
         else -> {
             val s = obj.toString()
-            val list = JyxalList.create()
+            val list = MyxalList.create()
             for (c in s) {
                 list.add(lambda.call(c.toString()))
             }
@@ -345,7 +345,7 @@ fun unescapeString(st: String): String {
 
 
 fun truthValue(obj: Any): Boolean {
-    if (obj is JyxalList) {
+    if (obj is MyxalList) {
         return obj.isNotEmpty()
     } else if (obj is BigComplex) {
         return obj != BigComplex.ZERO
@@ -358,7 +358,7 @@ fun vectorise(arity: Int, function: (ProgramStack) -> Any, stack: ProgramStack):
     when (arity) {
         1 -> {
             val obj = stack.pop()
-            if (obj is JyxalList) {
+            if (obj is MyxalList) {
                 return obj.map { function(ProgramStack(it)) }
             }
             stack.push(obj)
@@ -366,12 +366,12 @@ fun vectorise(arity: Int, function: (ProgramStack) -> Any, stack: ProgramStack):
         2 -> {
             val right = stack.pop()
             val left = stack.pop()
-            if (left is JyxalList) {
-                if (right is JyxalList) {
-                    return left.zip(right) { a, b -> function(ProgramStack(a, b)) }
+            if (left is MyxalList) {
+                if (right is MyxalList) {
+                    return left.zipmap(right) { a, b -> function(ProgramStack(a, b)) }
                 }
                 return left.map { function(ProgramStack(it, right)) }
-            } else if (right is JyxalList) {
+            } else if (right is MyxalList) {
                 return right.map { function(ProgramStack(left, it)) }
             }
             stack.push(left)
@@ -381,25 +381,25 @@ fun vectorise(arity: Int, function: (ProgramStack) -> Any, stack: ProgramStack):
             val right = stack.pop()
             val middle = stack.pop()
             val left = stack.pop()
-            if (left is JyxalList) {
-                if (middle is JyxalList) {
-                    if (right is JyxalList) {
-                        return left.zip(middle).zip(right) { a, b ->
-                            a as JyxalList
+            if (left is MyxalList) {
+                if (middle is MyxalList) {
+                    if (right is MyxalList) {
+                        return left.zip(middle).zipmap(right) { a, b ->
+                            a as MyxalList
                             function(ProgramStack(a[0], a[1], b))
                         }
                     }
-                    return left.zip(middle) { a, b -> function(ProgramStack(a, b, right)) }
-                } else if (right is JyxalList) {
-                    return left.zip(right) { a, b -> function(ProgramStack(a, middle, b)) }
+                    return left.zipmap(middle) { a, b -> function(ProgramStack(a, b, right)) }
+                } else if (right is MyxalList) {
+                    return left.zipmap(right) { a, b -> function(ProgramStack(a, middle, b)) }
                 }
                 return left.map { function(ProgramStack(it, middle, right)) }
-            } else if (middle is JyxalList) {
-                if (right is JyxalList) {
-                    return middle.zip(right) { a, b -> function(ProgramStack(left, a, b)) }
+            } else if (middle is MyxalList) {
+                if (right is MyxalList) {
+                    return middle.zipmap(right) { a, b -> function(ProgramStack(left, a, b)) }
                 }
                 return middle.map { function(ProgramStack(left, it, right)) }
-            } else if (right is JyxalList) {
+            } else if (right is MyxalList) {
                 return right.map { function(ProgramStack(left, middle, it)) }
             }
             stack.push(left)
