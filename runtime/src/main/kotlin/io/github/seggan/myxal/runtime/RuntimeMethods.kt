@@ -238,6 +238,10 @@ fun divFive(obj: Any): Any = divisibleBy(obj, 5)
 
 fun divThree(obj: Any): Any = divisibleBy(obj, 3)
 
+fun dotProduct(a: Any, b: Any): Any {
+    return listify(a).zip(listify(b), ::multiply).reduce(::add)
+}
+
 fun doubleRepeat(obj: Any): Any {
     return when (obj) {
         is JyxalList -> {
