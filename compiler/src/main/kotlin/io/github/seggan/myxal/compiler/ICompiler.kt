@@ -13,8 +13,11 @@ import org.apache.commons.cli.CommandLine
 
 abstract class ICompiler<O>(protected val options: CommandLine) {
 
-    fun visit(node: Node?) {
-        node?.accept(this)
+    protected lateinit var currentNode: Node
+
+    open fun visit(node: Node) {
+        currentNode = node
+        node.accept(this)
     }
 
     fun visit(nodes: List<Node>) {

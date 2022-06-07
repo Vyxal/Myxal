@@ -9,7 +9,7 @@ import org.objectweb.asm.tree.InsnNode
 import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.VarInsnNode
 
-fun optimise(codeBlock: InsnList, myxalMethod: MyxalMethod) {
+internal fun optimise(codeBlock: InsnList, myxalMethod: MyxalMethod) {
     // first remove all stack loads
     val toRemove = HashSet<AbstractInsnNode>()
     for (insn in codeBlock) {

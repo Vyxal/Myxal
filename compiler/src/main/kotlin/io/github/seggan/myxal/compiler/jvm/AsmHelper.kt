@@ -4,7 +4,7 @@ import io.github.seggan.myxal.compiler.jvm.wrappers.MyxalMethod
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 
-object AsmHelper : Opcodes {
+internal object AsmHelper : Opcodes {
 
     fun addBigDecimal(number: String, mv: MethodVisitor) {
         mv.visitTypeInsn(Opcodes.NEW, "java/math/BigDecimal")

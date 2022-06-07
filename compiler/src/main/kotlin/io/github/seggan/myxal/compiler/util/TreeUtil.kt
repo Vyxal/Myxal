@@ -15,16 +15,32 @@ import org.apache.commons.cli.CommandLine
 
 object TreeUtil {
 
-    fun getFirstElement(tree: Node): Element? {
-        val result: Element? = null
+    fun getFirstElement(tree: List<Node>): Element? {
+        var result: Element? = null
+        object : BasicVisitor() {
+            override fun visitElement(element: Element) {
+                result = element
+                stopVisiting()
+            }
+        }.compile(tree)
         return result
     }
 }
 
 private open class BasicVisitor : ICompiler<Unit>(CommandLine.Builder().build()) {
 
+    private class StopVisitor : RuntimeException()
+
+    protected fun stopVisiting() {
+        throw StopVisitor()
+    }
+
     override fun compile(ast: List<Node>) {
-        visit(ast)
+        try {
+            visit(ast)
+        } catch (e: StopVisitor) {
+            // do nothing
+        }
     }
 
     override fun visitElement(element: Element) {
@@ -102,19 +118,19 @@ private open class BasicVisitor : ICompiler<Unit>(CommandLine.Builder().build())
     }
 
     override fun visitList(value: ListNode) {
-        visit(value.values)
+        // Nothing to do
     }
 
     override fun visitLambda(node: LambdaNode) {
-
+        // Nothing to do
     }
 
     override fun wrapStack() {
-        TODO("Not yet implemented")
+        // Nothing to do
     }
 
     override fun stackSize() {
-        TODO("Not yet implemented")
+        // Nothing to do
     }
 
 }

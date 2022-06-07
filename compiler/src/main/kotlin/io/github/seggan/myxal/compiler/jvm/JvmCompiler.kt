@@ -40,7 +40,7 @@ class JvmCompiler(options: CommandLine, val isTest: Boolean) : ICompiler<ByteArr
         }
     }
 
-    private val mv: MyxalMethod
+    private inline val mv: MyxalMethod
         get() = callStack.peek()
 
     private lateinit var clinit: MethodVisitor
