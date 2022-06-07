@@ -4,12 +4,8 @@ options {
     tokenVocab=MyxalLexer;
 }
 
-@members {
-boolean isAlias = false;
-}
-
 file
-    : {isAlias = true;} alias* {isAlias = false;} program EOF
+    : alias* program EOF
     ;
 
 alias
@@ -119,8 +115,8 @@ mod_node
     : (element | statement | literal)
     ;
 
-element locals [boolean isInAlias]
-    : PREFIX? element_type {$isInAlias = isAlias;}
+element
+    : PREFIX? element_type
     ;
 
 element_type

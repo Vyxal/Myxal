@@ -13,6 +13,11 @@ class ElementTests {
     }
 
     @Test
+    fun testStringAliases() {
+        TestHelper.assertTopEquals("\"Hello,\"¢h\" World!\"¢w \"hw\"", "Hello, World!")
+    }
+
+    @Test
     fun doMathTests() {
         TestHelper.assertTopEquals("1 1+", "2")
         TestHelper.assertTopEquals("1 \"a\"+", "1a")

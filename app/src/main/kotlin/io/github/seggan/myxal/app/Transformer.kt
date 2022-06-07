@@ -37,10 +37,19 @@ import org.antlr.v4.runtime.tree.ErrorNode
  */
 class Transformer private constructor() : MyxalParserBaseVisitor<List<Node>>() {
 
-    private var aliases: MutableMap<String, ProgramContext> = HashMap()
+    private var aliases = mutableMapOf<String, ProgramContext>()
+    private val stringAliases = mutableMapOf<String, String>()
 
     override fun visitAlias(ctx: AliasContext): List<Node> {
-        aliases[ctx.theAlias.text] = ctx.program()
+        val programNodes = ctx.program().program_node()
+        if (programNodes.size == 1) {
+            val statement = programNodes[0].getChild(0).getChild(0)
+            if (statement is StringContext) {
+                stringAliases[ctx.element().text] = parseString(statement)
+                return emptyList()
+            }
+        }
+        aliases[ctx.element().text] = ctx.program()
         return emptyList()
     }
 
@@ -123,11 +132,19 @@ class Transformer private constructor() : MyxalParserBaseVisitor<List<Node>>() {
     }
 
     override fun visitString(ctx: StringContext): List<Node> {
+        var str = parseString(ctx)
+        for ((key, value) in stringAliases) {
+            str = str.replace(key, value)
+        }
+        return listOf(StringNode(decompress(unescapeString(str))))
+    }
+
+    private fun parseString(ctx: StringContext): String {
         var str = ctx.text.substring(1)
         if (str.endsWith("«") || str.endsWith("\"")) {
             str = str.substring(0, str.length - 1)
         }
-        return listOf(StringNode(decompress(unescapeString(str))))
+        return str
     }
 
     override fun visitList(ctx: ListContext): List<Node> {
